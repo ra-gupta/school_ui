@@ -18,7 +18,10 @@ class AttendanceController < ApplicationController
         on_date: @date, status:, source: "manual", marked_by_id: current_user.id,
         created_at: Time.current, updated_at: Time.current }
     end
-    Attendance.upsert_all(rows, unique_by: :idx_attendance_unique) if rows.any?
+    if rows.any?
+      Attendance.upsert_all(rows, unique_by: :idx_attendance_unique)
+      Notifications::AbsenceJob.perform_later(@section.id, @date)
+    end
     redirect_to attendance_path(section_id: @section.id, date: @date), notice: "#{rows.size} students marked."
   end
 

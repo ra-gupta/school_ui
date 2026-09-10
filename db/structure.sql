@@ -198,6 +198,78 @@ ALTER SEQUENCE public.admission_enquiries_id_seq OWNED BY public.admission_enqui
 
 
 --
+-- Name: ai_conversations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ai_conversations (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    title character varying,
+    last_message_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ai_conversations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ai_conversations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ai_conversations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ai_conversations_id_seq OWNED BY public.ai_conversations.id;
+
+
+--
+-- Name: ai_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ai_messages (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    ai_conversation_id bigint NOT NULL,
+    role character varying NOT NULL,
+    body text NOT NULL,
+    input_tokens integer,
+    output_tokens integer,
+    cached_tokens integer,
+    model character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ai_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ai_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ai_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ai_messages_id_seq OWNED BY public.ai_messages.id;
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1869,7 +1941,12 @@ CREATE TABLE public.message_logs (
     sent_at timestamp(6) without time zone,
     error character varying,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    event character varying,
+    user_id bigint,
+    attempts integer DEFAULT 0 NOT NULL,
+    delivered_at timestamp(6) without time zone,
+    dedupe_key character varying
 );
 
 
@@ -1905,7 +1982,8 @@ CREATE TABLE public.message_templates (
     body text NOT NULL,
     active boolean DEFAULT true NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    event character varying
 );
 
 
@@ -3064,7 +3142,9 @@ CREATE TABLE public.users (
     locale character varying,
     last_seen_at timestamp(6) without time zone,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    notification_channels character varying[] DEFAULT '{email}'::character varying[] NOT NULL,
+    muted_events character varying[] DEFAULT '{}'::character varying[] NOT NULL
 );
 
 
@@ -3272,6 +3352,20 @@ ALTER TABLE ONLY public.active_storage_variant_records ALTER COLUMN id SET DEFAU
 --
 
 ALTER TABLE ONLY public.admission_enquiries ALTER COLUMN id SET DEFAULT nextval('public.admission_enquiries_id_seq'::regclass);
+
+
+--
+-- Name: ai_conversations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_conversations ALTER COLUMN id SET DEFAULT nextval('public.ai_conversations_id_seq'::regclass);
+
+
+--
+-- Name: ai_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_messages ALTER COLUMN id SET DEFAULT nextval('public.ai_messages_id_seq'::regclass);
 
 
 --
@@ -3872,6 +3966,22 @@ ALTER TABLE ONLY public.active_storage_variant_records
 
 ALTER TABLE ONLY public.admission_enquiries
     ADD CONSTRAINT admission_enquiries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ai_conversations ai_conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_conversations
+    ADD CONSTRAINT ai_conversations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ai_messages ai_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_messages
+    ADD CONSTRAINT ai_messages_pkey PRIMARY KEY (id);
 
 
 --
@@ -4566,6 +4676,13 @@ CREATE UNIQUE INDEX idx_fee_structure_unique ON public.fee_structures USING btre
 
 
 --
+-- Name: idx_message_log_once; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_message_log_once ON public.message_logs USING btree (school_id, user_id, channel, dedupe_key) WHERE (dedupe_key IS NOT NULL);
+
+
+--
 -- Name: idx_on_student_id_transport_route_id_c368514e60; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4598,6 +4715,13 @@ CREATE UNIQUE INDEX idx_result_unique ON public.exam_results USING btree (exam_s
 --
 
 CREATE INDEX idx_slot_unique ON public.timetable_slots USING btree (section_id, weekday, starts_at);
+
+
+--
+-- Name: idx_template_for_event; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_template_for_event ON public.message_templates USING btree (school_id, event, channel);
 
 
 --
@@ -4668,6 +4792,48 @@ CREATE INDEX index_admission_enquiries_on_school_id ON public.admission_enquirie
 --
 
 CREATE INDEX index_admission_enquiries_on_school_id_and_status ON public.admission_enquiries USING btree (school_id, status);
+
+
+--
+-- Name: index_ai_conversations_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_conversations_on_school_id ON public.ai_conversations USING btree (school_id);
+
+
+--
+-- Name: index_ai_conversations_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_conversations_on_user_id ON public.ai_conversations USING btree (user_id);
+
+
+--
+-- Name: index_ai_conversations_on_user_id_and_last_message_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_conversations_on_user_id_and_last_message_at ON public.ai_conversations USING btree (user_id, last_message_at);
+
+
+--
+-- Name: index_ai_messages_on_ai_conversation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_messages_on_ai_conversation_id ON public.ai_messages USING btree (ai_conversation_id);
+
+
+--
+-- Name: index_ai_messages_on_ai_conversation_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_messages_on_ai_conversation_id_and_created_at ON public.ai_messages USING btree (ai_conversation_id, created_at);
+
+
+--
+-- Name: index_ai_messages_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ai_messages_on_school_id ON public.ai_messages USING btree (school_id);
 
 
 --
@@ -5644,6 +5810,13 @@ CREATE INDEX index_message_logs_on_school_id ON public.message_logs USING btree 
 
 
 --
+-- Name: index_message_logs_on_school_id_and_event_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_school_id_and_event_and_created_at ON public.message_logs USING btree (school_id, event, created_at);
+
+
+--
 -- Name: index_message_logs_on_school_id_and_sent_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5655,6 +5828,13 @@ CREATE INDEX index_message_logs_on_school_id_and_sent_at ON public.message_logs 
 --
 
 CREATE INDEX index_message_logs_on_sent_by_id ON public.message_logs USING btree (sent_by_id);
+
+
+--
+-- Name: index_message_logs_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_user_id ON public.message_logs USING btree (user_id);
 
 
 --
@@ -6807,6 +6987,14 @@ ALTER TABLE ONLY public.visitors
 
 
 --
+-- Name: ai_messages fk_rails_3fe0ce7814; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_messages
+    ADD CONSTRAINT fk_rails_3fe0ce7814 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: ptm_slots fk_rails_3ffc744f23; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6860,6 +7048,14 @@ ALTER TABLE ONLY public.timetable_slots
 
 ALTER TABLE ONLY public.fee_payments
     ADD CONSTRAINT fk_rails_4a111ceedb FOREIGN KEY (received_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: ai_messages fk_rails_4a646eee8b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_messages
+    ADD CONSTRAINT fk_rails_4a646eee8b FOREIGN KEY (ai_conversation_id) REFERENCES public.ai_conversations(id);
 
 
 --
@@ -6932,6 +7128,14 @@ ALTER TABLE ONLY public.cameras
 
 ALTER TABLE ONLY public.compliance_documents
     ADD CONSTRAINT fk_rails_50d988b895 FOREIGN KEY (owner_id) REFERENCES public.staffs(id);
+
+
+--
+-- Name: message_logs fk_rails_51328a0639; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs
+    ADD CONSTRAINT fk_rails_51328a0639 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -7332,6 +7536,14 @@ ALTER TABLE ONLY public.payslips
 
 ALTER TABLE ONLY public.role_assignments
     ADD CONSTRAINT fk_rails_8ddd873ee0 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: ai_conversations fk_rails_8ebdd7ab29; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_conversations
+    ADD CONSTRAINT fk_rails_8ebdd7ab29 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -7959,12 +8171,23 @@ ALTER TABLE ONLY public.test_questions
 
 
 --
+-- Name: ai_conversations fk_rails_faada8ac9a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ai_conversations
+    ADD CONSTRAINT fk_rails_faada8ac9a FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260910160500'),
+('20260910160000'),
+('20260910150000'),
 ('20260910140000'),
 ('20260910130001'),
 ('20260910130000'),

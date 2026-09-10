@@ -1,0 +1,43 @@
+<% content_for :title, "Alerts" %>
+<%= render "shared/header", title: "Alert settings" %>
+
+<%= form_with url: notification_preferences_path, method: :patch, class: "max-w-2xl space-y-6" do %>
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-sm font-semibold text-slate-900">How to reach you</h2>
+    <p class="mt-1 text-sm text-slate-500">
+      Email goes to <%= @user.email_address %><%= @user.phone.present? ? "; SMS and WhatsApp to #{@user.phone}" : "" %>.
+    </p>
+    <div class="mt-4 grid gap-2 sm:grid-cols-2">
+      <% Notifications::Channel.available.each do |channel| %>
+        <% needs = Notifications::Channel.needs(channel) %>
+        <% hint = case needs
+                  when :phone then ("add a mobile number first" if @user.phone.blank?)
+                  when :app then "needs the mobile app"
+                  end %>
+        <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-sm <%= "opacity-50" if hint %>">
+          <%= check_box_tag "notification_channels[]", channel, @user.notification_channels.include?(channel),
+                disabled: hint.present?, class: "rounded" %>
+          <span class="font-medium"><%= Notifications::Channel.label(channel) %></span>
+          <% if hint %><span class="text-xs text-slate-500">— <%= hint %></span><% end %>
+        </label>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-sm font-semibold text-slate-900">What to tell you about</h2>
+    <div class="mt-4 space-y-2">
+      <% SchoolEvent.all.each do |event| %>
+        <label class="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-2.5 text-sm">
+          <%= check_box_tag "subscribed_events[]", event.key, !@user.muted?(event.key), class: "mt-0.5 rounded" %>
+          <span>
+            <span class="font-medium"><%= event.name %></span>
+            <span class="block text-xs text-slate-500"><%= event.default_body.gsub(/\{\{\w+\}\}/, "…") %></span>
+          </span>
+        </label>
+      <% end %>
+    </div>
+  </section>
+
+  <%= submit_tag "Save", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800", name: nil %>
+<% end %>

@@ -21,7 +21,10 @@ module Api
             on_date: date, status: mark[:status], source: "app", marked_by_id: current_user.id,
             created_at: Time.current, updated_at: Time.current }
         end
-        Attendance.upsert_all(rows, unique_by: :idx_attendance_unique) if rows.any?
+        if rows.any?
+          Attendance.upsert_all(rows, unique_by: :idx_attendance_unique)
+          Notifications::AbsenceJob.perform_later(section.id, date)
+        end
         render json: { marked: rows.size, date: }, status: :created
       end
 
