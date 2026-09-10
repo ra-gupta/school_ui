@@ -60,6 +60,9 @@ group :test do
   gem "selenium-webdriver"
 end
 
+# The AI assistant answers questions grounded in this school's own data.
+gem "anthropic"
+
 # Ruby 3.4 dropped csv from the default gems; the reports export needs it.
 gem "csv"
 

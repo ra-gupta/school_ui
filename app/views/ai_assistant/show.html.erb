@@ -1,0 +1,61 @@
+<% content_for :title, "AI Assistant" %>
+<%= render "shared/header", title: "AI Assistant" %>
+
+<% unless @configured %>
+  <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    <strong>Not configured.</strong> Set <code class="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY</code> on the server to enable answers.
+  </div>
+<% end %>
+
+<div class="grid gap-4 lg:grid-cols-4">
+  <aside class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 p-3">
+      <%= link_to "New conversation", ai_assistant_path, class: "block rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white hover:bg-slate-800" %>
+    </div>
+    <ul class="max-h-96 divide-y divide-slate-100 overflow-y-auto text-sm">
+      <% @conversations.each do |c| %>
+        <li>
+          <%= link_to c.display_title, ai_assistant_path(id: c.id),
+                class: "block truncate p-3 #{@conversation&.id == c.id ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}" %>
+        </li>
+      <% end %>
+      <% if @conversations.empty? %><li class="p-4 text-center text-slate-400">No questions yet.</li><% end %>
+    </ul>
+  </aside>
+
+  <section class="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-3">
+    <div class="flex-1 space-y-4 overflow-y-auto p-5" style="min-height: 20rem; max-height: 30rem">
+      <% @messages.each do |m| %>
+        <div class="flex <%= m.role == "user" ? "justify-end" : "justify-start" %>">
+          <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm <%= m.role == "user" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-900" %>">
+            <p class="whitespace-pre-line"><%= m.body %></p>
+            <% if m.role == "assistant" && m.output_tokens %>
+              <p class="mt-1.5 text-[10px] text-slate-500">
+                <%= m.model %> · <%= m.input_tokens %> in / <%= m.output_tokens %> out<%= " · #{m.cached_tokens} cached" if m.cached_tokens.to_i.positive? %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @messages.empty? %>
+        <div class="py-8 text-center">
+          <p class="text-sm text-slate-500">Ask about this school's own records.</p>
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <% ["How many students are absent today?", "What are the outstanding fees?",
+                "How much did we collect this month?", "How many books are overdue?"].each do |example| %>
+              <%= button_to example, ai_assistant_path, params: { question: example },
+                    class: "rounded-full border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:border-slate-400 hover:bg-slate-50" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%= form_with url: ai_assistant_path(id: @conversation&.id), method: :post, class: "flex gap-2 border-t border-slate-200 p-3" do %>
+      <%= text_field_tag :question, nil, placeholder: "Ask about attendance, fees, exams…", autocomplete: "off",
+            required: true, class: "flex-1 rounded-lg border-slate-300 text-sm shadow-sm" %>
+      <%= submit_tag "Ask", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800", name: nil %>
+    <% end %>
+  </section>
+</div>

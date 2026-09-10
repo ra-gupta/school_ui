@@ -13,7 +13,7 @@ ActiveRecord::Base.transaction do
                      admissions certificates id_cards payroll accounts
                      communications ptm surveys knowledge_base website engagement chat
                      online_exams lesson_plans assessment live_classes study_center digital_eval
-                     compliance support backups storage reports].freeze
+                     compliance support backups storage reports ai_assistant].freeze
 
   ROLE_PERMISSIONS = {
     "Principal"  => %w[*],

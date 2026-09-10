@@ -7,6 +7,16 @@ Last session: 2026-09-09.
 
 ---
 
+## Not built: parents are not actually notified yet
+
+`message_templates` and `message_logs` model what a message *is*, and PTM/notices/homework
+all have audiences — but **nothing sends**. There is no delivery adapter (SMS/WhatsApp
+gateway, FCM push, transactional email), no trigger firing on an event (marked absent,
+homework assigned, invoice due, bus near a stop), and no per-parent channel preference or
+opt-out. Solid Queue is configured, so recurring and event jobs have somewhere to run.
+This is the next substantial piece of work, and the Flutter app depends on the push half
+of it.
+
 ## Where to pick up
 
 **Next task: build the remaining 35 web modules on the `Manageable` foundation, then the Flutter app.**

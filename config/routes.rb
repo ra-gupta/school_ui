@@ -146,6 +146,8 @@ Rails.application.routes.draw do
   resources :backup_runs, path: "backups"
   resources :stored_files, path: "storage"
   resource  :reports, only: :show, path: "reports"
+  get  "ai-assistant(/:id)", to: "ai_assistant#show", as: :ai_assistant
+  post "ai-assistant(/:id)", to: "ai_assistant#create"
 
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do
