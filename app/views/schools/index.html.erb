@@ -1,0 +1,26 @@
+<% content_for :title, "Schools" %>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Schools</h1>
+  <%= link_to "New school", new_school_path, class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+</div>
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">School</th><th class="p-3">Subdomain</th><th class="p-3">Modules</th><th class="p-3">Subscription</th><th></th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @schools.each do |s| %>
+        <tr>
+          <td class="p-3 font-medium"><%= s.name %> <span class="text-slate-400"><%= s.code %></span></td>
+          <td class="p-3 text-slate-500"><%= s.subdomain %></td>
+          <td class="p-3 text-slate-500"><%= s.enabled_modules.size %> optional</td>
+          <td class="p-3 <%= "text-red-600" if s.expired? %>"><%= s.subscription_ends_on&.to_fs(:long) || "—" %></td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <%= button_to "Enter", enter_school_path(s), class: "rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500" %>
+            <%= link_to "Edit", edit_school_path(s), class: "ml-3 text-xs font-medium text-slate-600 underline hover:text-slate-900" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,30 @@
+<%= form_with model: @school, class: "space-y-5 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <% if @school.errors.any? %>
+    <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700"><%= @school.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="block"><span class="text-sm font-medium">Name</span><%= f.text_field :name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Code</span><%= f.text_field :code, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Subdomain</span><%= f.text_field :subdomain, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Email</span><%= f.email_field :email, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Phone</span><%= f.telephone_field :phone, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Brand colour</span><%= f.color_field :primary_color, class: "mt-1 h-10 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Subscription ends</span><%= f.date_field :subscription_ends_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="flex items-center gap-2 pt-6"><%= f.check_box :active, class: "rounded" %><span class="text-sm">Active</span></label>
+  </div>
+
+  <fieldset>
+    <legend class="text-sm font-medium">Apps Center — optional modules</legend>
+    <div class="mt-2 grid gap-2 sm:grid-cols-3">
+      <% SchoolModule.optional.each do |m| %>
+        <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <%= check_box_tag "school[enabled_modules][]", m.key, @school.enabled_modules.include?(m.key), id: "mod_#{m.key}", class: "rounded" %>
+          <span><%= m.icon %> <%= m.name %></span>
+        </label>
+      <% end %>
+    </div>
+    <%= hidden_field_tag "school[enabled_modules][]", "" %>
+  </fieldset>
+
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>

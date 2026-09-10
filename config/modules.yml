@@ -1,0 +1,46 @@
+# The Apps Center. `core: true` modules can't be switched off.
+# ponytail: emoji icons, swap for heroicon SVGs when the nav gets a design pass.
+students:      { name: Student Information, icon: "🎓", group: Academics, core: true }
+academics:     { name: Academics,           icon: "📚", group: Academics, core: true }
+attendance:    { name: Attendance,          icon: "✅", group: Academics, core: true }
+exams:         { name: Exams & Results,     icon: "📝", group: Academics, core: true }
+fees:          { name: Fees Collection,     icon: "💰", group: Finance,   core: true }
+hr:            { name: Human Resources,     icon: "👔", group: People,    core: true }
+notices:       { name: Notices,             icon: "📢", group: Comms,     core: true }
+homework:      { name: Homework,            icon: "📒", group: Academics }
+timetable:     { name: Timetable,           icon: "🗓️", group: Academics }
+online_exams:  { name: Online Exams (CBT),  icon: "🖥️", group: Academics , path: "/online-exams" }
+lesson_plans:  { name: Lesson Planner,      icon: "🗒️", group: Academics , path: "/lesson-plans" }
+assessment:    { name: Assessment & CBC,    icon: "📊", group: Academics }
+live_classes:  { name: Live Classes,        icon: "🎥", group: Academics , path: "/live-classes" }
+study_center:  { name: Study Center,        icon: "📁", group: Academics , path: "/study-center" }
+digital_eval:  { name: Digital Evaluation,  icon: "🖊️", group: Academics , path: "/digital-evaluation" }
+library:       { name: Library,             icon: "📖", group: Operations }
+transport:     { name: Transport & GPS,     icon: "🚌", group: Operations }
+hostel:        { name: Hostel,              icon: "🛏️", group: Operations }
+inventory:     { name: Inventory,           icon: "📦", group: Operations }
+assets:        { name: Asset Management,    icon: "🏷️", group: Operations , path: "/asset-register" }
+front_office:  { name: Front Office,        icon: "🛎️", group: Operations , path: "/front-office" }
+gate_pass:     { name: Gate Pass,           icon: "🚪", group: Operations , path: "/gate-pass" }
+health:        { name: Health Records,      icon: "🩺", group: Operations }
+cctv:          { name: CCTV Live View,      icon: "📹", group: Operations }
+workers:       { name: Campus Workers,      icon: "🧹", group: People }
+payroll:       { name: Payroll,             icon: "🧾", group: People }
+admissions:    { name: Admission CRM,       icon: "📥", group: People }
+certificates:  { name: Certificates,        icon: "🏅", group: People }
+id_cards:      { name: ID Card Designer,    icon: "🪪", group: People , path: "/id-cards" }
+accounts:      { name: Accounts & Finance,  icon: "🏦", group: Finance }
+chat:          { name: Parent-Teacher Chat, icon: "💬", group: Comms }
+communications: { name: Communications,      icon: "📨", group: Comms }
+ptm:           { name: PTM Scheduling,      icon: "🤝", group: Comms }
+surveys:       { name: Surveys & Feedback,  icon: "🗳️", group: Comms }
+knowledge_base: { name: Knowledge Base,      icon: "❓", group: Comms , path: "/knowledge-base" }
+website:       { name: Website Builder,     icon: "🌐", group: Comms }
+engagement:    { name: Engagement & Cards,  icon: "🎉", group: Comms }
+ai_assistant:  { name: AI Assistant,        icon: "🤖", group: System , path: "/ai-assistant" }
+biometrics:    { name: Biometric Devices,   icon: "🖐️", group: System }
+compliance:    { name: Compliance,          icon: "⚖️", group: System }
+reports:       { name: Reports & Export,    icon: "📈", group: System }
+storage:       { name: Storage Center,      icon: "🗄️", group: System }
+support:       { name: Support Tickets,     icon: "🎫", group: System }
+backups:       { name: Backups,             icon: "💾", group: System }
