@@ -123,6 +123,24 @@ Rails.application.routes.draw do
   resources :greeting_campaigns, path: "engagement"
   resources :conversations, path: "chat", only: [ :index, :show, :create, :update ]
 
+  scope "/online-exams", as: :online_exams do
+    root "online_tests#index", as: :root
+    resources :online_tests, path: "tests"
+    resources :test_questions, path: "questions"
+    resources :test_attempts, path: "attempts"
+  end
+
+  scope "/assessment" do
+    root "competencies#index", as: :assessment
+    resources :competencies, path: "competencies"
+    resources :competency_scores, path: "levels"
+  end
+
+  resources :lesson_plans, path: "lesson-plans"
+  resources :live_classes, path: "live-classes"
+  resources :study_materials, path: "study-center"
+  resources :evaluations, path: "digital-evaluation"
+
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do
     namespace :v1 do
