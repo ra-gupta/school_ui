@@ -10,7 +10,8 @@ ActiveRecord::Base.transaction do
   # it keeps the sidebar from advertising screens that don't exist yet.
   BUILT_MODULES = %w[homework timetable library transport hostel inventory assets
                      front_office gate_pass health cctv workers biometrics
-                     admissions certificates id_cards payroll accounts].freeze
+                     admissions certificates id_cards payroll accounts
+                     communications ptm surveys knowledge_base website engagement chat].freeze
 
   ROLE_PERMISSIONS = {
     "Principal"  => %w[*],
@@ -57,7 +58,7 @@ ActiveRecord::Base.transaction do
     teachers = 12.times.map do |n|
       user = User.find_or_initialize_by(email_address: "teacher#{n + 1}@#{attrs[:subdomain]}.test", school_id: school.id)
       user.update!(name: "#{%w[Priya Amit Sneha Vikas Meera Rohit Kavya Arjun Divya Nikhil Pooja Sanjay][n]} #{%w[Patil Joshi Rao Nair Desai Iyer Kulkarni Menon Shah Gupta Reddy Verma][n]}",
-                   kind: "teacher", password: SEED_PASSWORD, phone: "+9198#{format("%08d", n)}")
+                   kind: "teacher", password: SEED_PASSWORD, phone: "+9198#{idx}#{format("%07d", n)}")
       user.roles = [ roles["Teacher"] ]
       staff = Staff.find_or_initialize_by(employee_no: "EMP#{format("%03d", n + 1)}")
       staff.update!(user:, first_name: user.name.split.first, last_name: user.name.split.last,
@@ -109,11 +110,20 @@ ActiveRecord::Base.transaction do
                       address: "#{rand(1..99)} MG Road, #{attrs[:city]}")
 
       guardian = Guardian.find_or_initialize_by(name: "#{last_names[n % last_names.size]} Parent #{n + 1}")
-      guardian.update!(relation: n.even? ? "Father" : "Mother", phone: "+9199#{format("%08d", n)}",
+      guardian.update!(relation: n.even? ? "Father" : "Mother", phone: "+9199#{idx}#{format("%07d", n)}",
                        email: "parent#{n + 1}@#{attrs[:subdomain]}.test", occupation: %w[Engineer Teacher Doctor Business].sample)
       Guardianship.find_or_create_by!(guardian:, student:) { it.primary_contact = true }
 
-      if n < 20 # give the first 20 parents a real login
+      if n < 20 # first 20 families get real logins — parent and student
+        student.update!(phone: "+9197#{idx}#{format("%07d", n)}")
+        su = User.find_or_initialize_by(email_address: "student#{idx}#{n}@#{attrs[:subdomain]}.test")
+        su.update!(name: student.name, kind: "student", password: SEED_PASSWORD,
+                   phone: student.phone, school: school)
+        su.roles = [ roles["Student"] ]
+        student.update!(user: su)
+      end
+
+      if n < 20
         pu = User.find_or_initialize_by(email_address: guardian.email, school_id: school.id)
         pu.update!(name: guardian.name, kind: "parent", password: SEED_PASSWORD, phone: guardian.phone)
         pu.roles = [ roles["Parent"] ]
@@ -430,6 +440,109 @@ ActiveRecord::Base.transaction do
                             on_date: rand(1..90).days.ago.to_date,
                             payment_mode: %w[cash upi bank cheque].sample,
                             reference: "REF#{rand(10_000..99_999)}", recorded_by: principal)
+      end
+    end
+
+
+    # ---- Communications modules --------------------------------------------
+    [ [ "Fee due reminder", "sms", nil, "Dear parent, fees for {{period}} are due on {{due_date}}. Pay via the app to avoid a late fine." ],
+     [ "Absence alert", "sms", nil, "{{student_name}} was marked absent today ({{date}}). Please contact the class teacher." ],
+     [ "Exam schedule", "email", "Exam datesheet", "The datesheet for {{exam}} is now published. Please check the app for subject-wise timings." ],
+     [ "PTM invitation", "whatsapp", nil, "You are invited to the parent-teacher meeting on {{date}}. Book a slot in the app." ],
+     [ "Holiday notice", "push", "Holiday", "School will remain closed on {{date}} on account of {{occasion}}." ]
+    ].each do |name, channel, subject, body|
+      tpl = MessageTemplate.find_or_initialize_by(name:)
+      tpl.update!(channel:, subject:, body:, active: true)
+    end
+    if MessageLog.count.zero?
+      MessageTemplate.find_each do |tpl|
+        3.times do |n|
+          MessageLog.create!(message_template: tpl, channel: tpl.channel, audience: %w[all parents students staff].sample,
+                             subject: tpl.subject, body: tpl.body, sent_by: principal,
+                             status: n.zero? ? "queued" : "sent", recipient_count: rand(40..240),
+                             sent_at: n.zero? ? nil : rand(1..30).days.ago)
+        end
+      end
+    end
+
+    if PtmMeeting.count.zero?
+      Section.includes(:grade).order("grades.level").first(3).each_with_index do |section, n|
+        meeting = PtmMeeting.create!(title: "PTM · #{section.full_name}", section:,
+                                     on_date: (n + 1).weeks.from_now.to_date, starts_at: "09:00", ends_at: "12:00",
+                                     slot_minutes: 15, venue: "Block A Hall", status: "open")
+        meeting.generate_slots!(section.class_teacher) if section.class_teacher
+        meeting.ptm_slots.limit(6).each_with_index do |slot, i|
+          slot.update!(student: section.students[i], status: %w[booked booked attended].sample) if section.students[i]
+        end
+      end
+    end
+
+    if Survey.count.zero?
+      survey = Survey.create!(title: "Parent satisfaction #{Date.current.year}",
+                              description: "Help us improve teaching, facilities and communication.",
+                              audience: "parents", opens_on: 2.weeks.ago.to_date,
+                              closes_on: 2.weeks.from_now.to_date, anonymous: true, status: "open")
+      [ [ "How satisfied are you with the teaching quality?", "rating", [] ],
+       [ "How satisfied are you with school communication?", "rating", [] ],
+       [ "How would you rate the transport service?", "rating", [] ],
+       [ "Which facility needs the most improvement?", "choice", [ "Library", "Sports", "Labs", "Canteen", "Transport" ] ],
+       [ "Anything else you would like us to know?", "text", [] ]
+      ].each_with_index do |(prompt, kind, choices), i|
+        question = SurveyQuestion.create!(survey:, prompt:, kind:, choices:, position: i, required: kind != "text")
+        parent_users = User.where(kind: "parent").limit(15).to_a
+        parent_users.each do |parent|
+          case kind
+          when "rating" then SurveyResponse.create!(survey_question: question, user: parent, rating: rand(3..5))
+          when "choice" then SurveyResponse.create!(survey_question: question, user: parent, choice: choices.sample)
+          else SurveyResponse.create!(survey_question: question, user: parent, answer: "More frequent updates would help.")
+          end
+        end
+      end
+    end
+
+    [ [ "How do I pay fees online?", "Fees", "Open the parent app, tap Fees, pick the invoice and choose UPI, card or netbanking. A receipt is issued immediately." ],
+     [ "How do I apply for leave?", "Attendance", "Use Attendance → Apply leave in the app, or send a written note to the class teacher." ],
+     [ "When is the bus due at my stop?", "Transport", "Transport → Live map shows the bus position and its expected arrival at your stop." ],
+     [ "How do I get a bonafide certificate?", "Certificates", "Request it from the front office or through the app; it is usually issued within two working days." ],
+     [ "How do I reset my app password?", "Account", "Tap Forgot password on the sign-in screen and follow the emailed link." ]
+    ].each do |title, category, body|
+      article = KbArticle.find_or_initialize_by(title:)
+      article.update!(category:, body:, audience: "parents", published: true, views: rand(20..400))
+    end
+
+    [ [ "Home", "home", "page", 0 ], [ "About us", "about-us", "page", 1 ], [ "Admissions", "admissions", "page", 2 ],
+     [ "Facilities", "facilities", "page", 3 ], [ "Annual Day highlights", "annual-day", "news", 4 ],
+     [ "Contact", "contact", "page", 5 ] ].each do |title, slug, section_kind, position|
+      page = WebPage.find_or_initialize_by(slug:)
+      page.update!(title:, section: section_kind, position:, published: position < 4,
+                   body: "#{title} content for #{school.name}.")
+    end
+
+    [ [ "Birthday wishes", "birthday", "students" ], [ "Exam toppers", "achievement", "all" ],
+     [ "Festival greetings", "festival", "all" ], [ "Welcome aboard", "welcome", "parents" ]
+    ].each do |title, occasion, audience|
+      campaign = GreetingCampaign.find_or_initialize_by(title:)
+      campaign.update!(occasion:, audience:, background_color: school.primary_color,
+                       message: "Wishing you a wonderful #{occasion} from all of us at #{school.name}!",
+                       automatic: occasion == "birthday")
+    end
+
+    if Conversation.count.zero?
+      Guardian.where.not(user_id: nil).limit(8).each_with_index do |guardian, n|
+        student = guardian.students.first
+        next unless student&.section&.class_teacher
+        teacher = student.section.class_teacher
+        convo = Conversation.create!(student:, staff: teacher, guardian:,
+                                     subject: [ "Homework doubt", "Attendance query", "Fee receipt", "Progress discussion" ][n % 4])
+        [ [ guardian.user, "Good morning ma'am, I had a question about #{student.first_name}'s homework." ],
+         [ teacher.user, "Good morning! Happy to help — which subject is it about?" ],
+         [ guardian.user, "Mathematics. The worksheet from yesterday." ],
+         [ teacher.user, "Sure. Questions 4 and 7 are optional; the rest should be attempted. I'll share a solved example in class tomorrow." ]
+        ].each_with_index do |(sender, body), i|
+          next unless sender
+          ChatMessage.create!(conversation: convo, sender:, body:,
+                              created_at: (4 - i).hours.ago, read_at: i < 3 ? Time.current : nil)
+        end
       end
     end
 
