@@ -1,0 +1,79 @@
+<% content_for :title, resource_title %>
+<% filters = resource_config[:fields].select(&:belongs_to?).first(3) %>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <span class="grid h-10 w-10 place-items-center rounded-xl bg-white text-lg ring-1 ring-slate-200"><%= SchoolModule[resource_config[:module_key]]&.icon %></span>
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight"><%= resource_title %></h1>
+      <p class="text-sm text-slate-500"><%= pluralize(@total, "record") %></p>
+    </div>
+  </div>
+  <% if current_user.can?("#{resource_config[:module_key]}.write") %>
+    <%= link_to "New", url_for(action: :new), class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800" %>
+  <% end %>
+</div>
+
+<% if tabs.any? %>
+  <nav class="mb-4 flex gap-1 rounded-xl border border-slate-200 bg-white p-1 text-sm shadow-sm">
+    <% tabs.each do |label, path| %>
+      <%= link_to label, path, class: "rounded-lg px-3 py-1.5 font-medium #{request.path == path ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}" %>
+    <% end %>
+  </nav>
+<% end %>
+
+<% if resource_config[:search].any? || filters.any? %>
+  <%= form_with url: url_for(action: :index), method: :get, class: "mb-4 flex flex-wrap gap-2" do %>
+    <% if resource_config[:search].any? %>
+      <%= text_field_tag :q, params[:q], placeholder: "Search #{resource_config[:search].map { it.humanize.downcase }.to_sentence}",
+            class: "w-64 rounded-lg border-slate-300 text-sm shadow-sm" %>
+    <% end %>
+    <% filters.each do |field| %>
+      <%= select_tag field.key,
+            options_from_collection_for_select(field_collection(model.new, field), :id, ->(o) { field_label_for(o) }, params[field.key]),
+            include_blank: "All #{field.label.downcase.pluralize}", class: "rounded-lg border-slate-300 text-sm shadow-sm" %>
+    <% end %>
+    <%= submit_tag "Filter", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300", name: nil %>
+  <% end %>
+<% end %>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <tr>
+          <% resource_config[:columns].each do |col| %>
+            <th class="p-3 font-medium <%= "text-right" if col.align == :right %>"><%= col.label %></th>
+          <% end %>
+          <th class="p-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% @records.each do |record| %>
+          <tr class="hover:bg-slate-50">
+            <% resource_config[:columns].each_with_index do |col, i| %>
+              <td class="p-3 <%= col.align == :right ? "text-right tabular-nums" : "" %> <%= "font-medium" if i.zero? %>">
+                <% value = record.display(col) %>
+                <% if col.type == :money %><%= rupees(record.public_send(col.name)) %>
+                <% elsif value.nil? %><span class="text-slate-300">—</span>
+                <% else %><%= value %><% end %>
+              </td>
+            <% end %>
+            <td class="p-3 text-right whitespace-nowrap">
+              <% if current_user.can?("#{resource_config[:module_key]}.write") %>
+                <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-xs font-medium text-slate-600 underline hover:text-slate-900" %>
+                <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,
+                      form: { data: { turbo_confirm: "Delete this record?" }, class: "inline" },
+                      class: "ml-3 text-xs text-slate-400 hover:text-red-600" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @records.empty? %>
+          <tr><td colspan="<%= resource_config[:columns].size + 1 %>" class="p-10 text-center text-slate-400">Nothing here yet.</td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render "shared/pager" %>
+</div>

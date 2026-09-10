@@ -1,0 +1,21 @@
+<% required = field.required
+   classes = "mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-slate-400 focus:ring-0" %>
+<label class="block <%= "sm:col-span-3" if field.type == :text %>">
+  <span class="text-sm font-medium text-slate-700"><%= field.label %><%= " *" if required %></span>
+  <% case field.type
+     when :text %><%= f.text_area field.name, rows: 4, required:, class: classes %>
+  <% when :number %><%= f.number_field field.name, step: 1, required:, class: classes %>
+  <% when :money %><%= f.number_field field.name, step: 0.01, required:, class: classes %>
+  <% when :date %><%= f.date_field field.name, required:, class: classes %>
+  <% when :datetime %><%= f.datetime_field field.name, required:, class: classes %>
+  <% when :time %><%= f.time_field field.name, required:, class: classes %>
+  <% when :email %><%= f.email_field field.name, required:, class: classes %>
+  <% when :tel %><%= f.telephone_field field.name, required:, class: classes %>
+  <% when :boolean %><%= f.select field.name, [["Yes", true], ["No", false]], {}, class: classes %>
+  <% when :select %><%= f.select field.name, field.options, { include_blank: !required }, class: classes %>
+  <% when :belongs_to %>
+    <%= f.collection_select field.key, field_collection(f.object, field), :id,
+          ->(o) { field_label_for(o) }, { include_blank: !required }, class: classes %>
+  <% else %><%= f.text_field field.name, required:, class: classes %>
+  <% end %>
+</label>

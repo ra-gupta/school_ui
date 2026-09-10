@@ -1,0 +1,3 @@
+<% content_for :title, "New #{resource_title}" %>
+<h1 class="mb-6 text-2xl font-semibold tracking-tight">New <%= resource_title.singularize.downcase %></h1>
+<%= render "resource/form" %>

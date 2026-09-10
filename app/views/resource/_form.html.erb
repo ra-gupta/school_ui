@@ -1,0 +1,14 @@
+<%= form_with model: @record, url: url_for(action: @record.new_record? ? :create : :update, id: @record), class: "space-y-6" do |f| %>
+  <%= render "shared/errors", record: @record %>
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="grid gap-4 sm:grid-cols-3">
+      <% resource_config[:fields].each do |field| %>
+        <%= render "resource/field", f: f, field: field %>
+      <% end %>
+    </div>
+  </section>
+  <div class="flex gap-3">
+    <%= f.submit @record.new_record? ? "Create" : "Save", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800" %>
+    <%= link_to "Cancel", url_for(action: :index), class: "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium" %>
+  </div>
+<% end %>
