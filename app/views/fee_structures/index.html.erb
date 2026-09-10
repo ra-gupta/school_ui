@@ -1,0 +1,38 @@
+<% content_for :title, "Fee structure" %>
+<%= render "shared/header", title: "Fee structure · #{current_academic_year&.name}" %>
+
+<% if current_user.can?("fees.write") %>
+  <%= form_with model: @structure, url: fee_structures_path, class: "mb-4 flex flex-wrap gap-2" do |f| %>
+    <%= f.collection_select :grade_id, Grade.ordered, :id, :name, { include_blank: "Class" }, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.collection_select :fee_head_id, FeeHead.order(:name), :id, :name, { include_blank: "Head" }, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.number_field :amount, step: 0.01, placeholder: "Amount", class: "w-32 rounded-lg border-slate-300 text-sm" %>
+    <%= f.select :frequency, FeeStructure::FREQUENCIES, {}, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.number_field :due_day, in: 1..28, placeholder: "Due day", class: "w-24 rounded-lg border-slate-300 text-sm" %>
+    <%= f.submit "Add", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+  <% end %>
+<% end %>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">Class</th><th class="p-3">Head</th><th class="p-3">Frequency</th><th class="p-3">Due day</th><th class="p-3 text-right">Amount</th><th></th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @structures.each do |s| %>
+        <tr>
+          <td class="p-3"><%= s.grade.name %></td>
+          <td class="p-3"><%= s.fee_head.name %></td>
+          <td class="p-3 text-slate-500"><%= s.frequency.humanize %></td>
+          <td class="p-3 text-slate-500"><%= s.due_day %></td>
+          <td class="p-3 text-right font-medium"><%= number_to_currency(s.amount, unit: "₹", precision: 0) %></td>
+          <td class="p-3 text-right">
+            <% if current_user.can?("fees.write") %>
+              <%= link_to "Edit", edit_fee_structure_path(s), class: "text-xs underline" %>
+              <%= button_to "Remove", fee_structure_path(s), method: :delete, class: "ml-2 text-xs text-slate-400 hover:text-red-600" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

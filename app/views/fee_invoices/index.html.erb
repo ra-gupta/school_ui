@@ -1,0 +1,42 @@
+<% content_for :title, "Fees" %>
+<%= render "shared/header", title: "Fees", actions: (safe_join([
+      link_to("Structures", fee_structures_path, class: "rounded-lg border border-slate-300 px-4 py-2 text-sm"),
+      link_to("Heads", fee_heads_path, class: "rounded-lg border border-slate-300 px-4 py-2 text-sm"),
+      (link_to("Raise invoice", new_fee_invoice_path, class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white") if current_user.can?("fees.write"))
+    ].compact, " ")) %>
+
+<div class="mb-4 grid gap-4 sm:grid-cols-3">
+  <%= render "dashboard/stat", label: "Billed",    value: number_to_currency(@totals[:billed], unit: "₹", precision: 0) %>
+  <%= render "dashboard/stat", label: "Collected", value: number_to_currency(@totals[:collected], unit: "₹", precision: 0) %>
+  <%= render "dashboard/stat", label: "Outstanding", value: number_to_currency(@totals[:due], unit: "₹", precision: 0) %>
+</div>
+
+<%= form_with url: fees_path, method: :get, class: "mb-4 flex flex-wrap gap-2" do %>
+  <%= text_field_tag :q, params[:q], placeholder: "Student name or admission no", class: "w-64 rounded-lg border-slate-300 text-sm" %>
+  <%= select_tag :status, options_for_select(["", "unpaid", "partial", "paid", "cancelled"], params[:status]), include_blank: "Any status", class: "rounded-lg border-slate-300 text-sm" %>
+  <label class="flex items-center gap-2 text-sm"><%= check_box_tag :overdue, "1", params[:overdue] == "1" %> Overdue only</label>
+  <%= submit_tag "Filter", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm", name: nil %>
+<% end %>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">Invoice</th><th class="p-3">Student</th><th class="p-3">Class</th><th class="p-3">Period</th><th class="p-3">Due</th><th class="p-3 text-right">Total</th><th class="p-3 text-right">Balance</th><th class="p-3"></th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @invoices.each do |i| %>
+        <tr class="hover:bg-slate-50">
+          <td class="p-3"><%= link_to i.number, i, class: "font-mono text-xs hover:underline" %></td>
+          <td class="p-3 font-medium"><%= link_to i.student.name, i.student, class: "hover:underline" %></td>
+          <td class="p-3 text-slate-500"><%= i.student.section&.full_name %></td>
+          <td class="p-3 text-slate-500"><%= i.period %></td>
+          <td class="p-3 <%= "text-red-600" if i.overdue? %>"><%= i.due_date.to_fs(:long) %></td>
+          <td class="p-3 text-right"><%= number_to_currency(i.total, unit: "₹", precision: 0) %></td>
+          <td class="p-3 text-right font-medium"><%= number_to_currency(i.balance, unit: "₹", precision: 0) %></td>
+          <td class="p-3"><span class="rounded-full px-2 py-0.5 text-xs <%= i.status == "paid" ? "bg-emerald-100 text-emerald-700" : i.overdue? ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700" %>"><%= i.status %></span></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= render "shared/pager" %>
+</div>

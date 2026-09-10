@@ -1,0 +1,6 @@
+<h1 class="mb-6 text-2xl font-semibold">Edit <%= @record.class.name.downcase %></h1>
+<%= form_with model: @record, class: "max-w-md space-y-4 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <%= render "shared/errors", record: @record %>
+  <%= f.text_field :name, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>

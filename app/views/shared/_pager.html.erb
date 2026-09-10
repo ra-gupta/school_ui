@@ -1,0 +1,9 @@
+<% if @pages.to_i > 1 %>
+  <nav class="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-sm">
+    <span class="text-slate-500"><%= @total %> results · page <%= @page %> of <%= @pages %></span>
+    <span class="flex gap-2">
+      <%= link_to "‹ Prev", url_for(request.query_parameters.merge(page: @page - 1)), class: "rounded border border-slate-300 px-3 py-1 #{"pointer-events-none opacity-40" if @page <= 1}" %>
+      <%= link_to "Next ›", url_for(request.query_parameters.merge(page: @page + 1)), class: "rounded border border-slate-300 px-3 py-1 #{"pointer-events-none opacity-40" if @page >= @pages}" %>
+    </span>
+  </nav>
+<% end %>

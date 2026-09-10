@@ -1,0 +1,30 @@
+<% content_for :title, "Students" %>
+<%= render "shared/header", title: "Students", actions: (link_to("Admit student", new_student_path, class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white") if current_user.can?("students.write")) %>
+
+<%= form_with url: students_path, method: :get, class: "mb-4 flex flex-wrap gap-2" do %>
+  <%= text_field_tag :q, params[:q], placeholder: "Name, admission no, phone", class: "w-64 rounded-lg border-slate-300 text-sm" %>
+  <%= select_tag :section_id, options_from_collection_for_select(@sections, :id, :full_name, params[:section_id]), include_blank: "All sections", class: "rounded-lg border-slate-300 text-sm" %>
+  <%= select_tag :status, options_for_select(%w[active alumni left suspended], params[:status] || "active"), class: "rounded-lg border-slate-300 text-sm" %>
+  <%= submit_tag "Filter", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm", name: nil %>
+<% end %>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">Adm. no</th><th class="p-3">Name</th><th class="p-3">Class</th><th class="p-3">Guardian</th><th class="p-3 text-right">Due</th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @students.each do |s| %>
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 font-mono text-xs text-slate-500"><%= s.admission_no %></td>
+          <td class="p-3 font-medium"><%= link_to s.name, s, class: "hover:underline" %></td>
+          <td class="p-3"><%= s.section&.full_name || "—" %></td>
+          <td class="p-3 text-slate-500"><%= s.guardians.first&.phone %></td>
+          <td class="p-3 text-right <%= "text-red-600 font-medium" if s.fees_due.positive? %>"><%= number_to_currency(s.fees_due, unit: "₹", precision: 0) %></td>
+        </tr>
+      <% end %>
+      <% if @students.empty? %><tr><td colspan="5" class="p-8 text-center text-slate-400">No students match.</td></tr><% end %>
+    </tbody>
+  </table>
+  <%= render "shared/pager" %>
+</div>

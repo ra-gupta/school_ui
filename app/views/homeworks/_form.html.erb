@@ -1,0 +1,13 @@
+<%= form_with model: @homework, class: "max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <%= render "shared/errors", record: @homework %>
+  <label class="block"><span class="text-sm font-medium">Title</span><%= f.text_field :title, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <label class="block"><span class="text-sm font-medium">Class</span><%= f.collection_select :section_id, Section.includes(:grade).order("grades.level", :name), :id, :full_name, {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Subject</span><%= f.collection_select :subject_id, Subject.order(:name), :id, :name, { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Teacher</span><%= f.collection_select :staff_id, Staff.active.order(:first_name), :id, :name, { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Assigned on</span><%= f.date_field :assigned_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Due on</span><%= f.date_field :due_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  </div>
+  <label class="block"><span class="text-sm font-medium">Description</span><%= f.text_area :description, rows: 5, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>

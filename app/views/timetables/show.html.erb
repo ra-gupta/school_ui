@@ -1,0 +1,31 @@
+<% content_for :title, "Timetable" %>
+<%= render "shared/header", title: "Timetable" %>
+<%= form_with url: timetable_path, method: :get, class: "mb-4 flex gap-2" do %>
+  <%= select_tag :section_id, options_from_collection_for_select(@sections, :id, :full_name, @section&.id), class: "rounded-lg border-slate-300 text-sm" %>
+  <%= submit_tag "Show", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm", name: nil %>
+<% end %>
+
+<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">Day</th>
+        <% @periods.each do |starts, ends| %><th class="p-3"><%= starts.strftime("%H:%M") %>–<%= ends.strftime("%H:%M") %></th><% end %></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% (1..6).each do |wd| %>
+        <tr>
+          <td class="p-3 font-medium"><%= TimetablesController::DAYS[wd] %></td>
+          <% @periods.each do |starts, _| %>
+            <% slot = @by_day[wd]&.find { |s| s.starts_at == starts } %>
+            <td class="p-3">
+              <% if slot %>
+                <p class="font-medium"><%= slot.subject&.name %></p>
+                <p class="text-xs text-slate-500"><%= slot.staff&.name %></p>
+              <% else %><span class="text-slate-300">—</span><% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

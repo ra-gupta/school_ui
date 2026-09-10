@@ -1,0 +1,25 @@
+<% content_for :title, "Marks entry" %>
+<%= render "shared/header", title: "#{@schedule.subject.name} · #{@schedule.section.full_name}" %>
+<p class="mb-4 text-sm text-slate-500"><%= @schedule.exam.name %> · max <%= @schedule.max_marks.to_i %> · pass <%= @schedule.pass_marks.to_i %></p>
+
+<%= form_with url: exam_marks_path(@schedule.exam, exam_schedule_id: @schedule.id), method: :patch do %>
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <tr><th class="p-3">Student</th><th class="p-3 w-32">Marks</th><th class="p-3 w-24">Absent</th><th class="p-3">Grade</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% @students.each do |s| %>
+          <% r = @results[s.id] %>
+          <tr>
+            <td class="p-3 font-medium"><%= s.name %></td>
+            <td class="p-3"><%= number_field_tag "results[#{s.id}][marks]", r&.marks&.to_i, min: 0, max: @schedule.max_marks.to_i, step: 0.5, class: "w-24 rounded-lg border-slate-300 text-sm" %></td>
+            <td class="p-3"><%= check_box_tag "results[#{s.id}][absent]", "1", r&.absent? %></td>
+            <td class="p-3 text-slate-500"><%= r&.grade %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= submit_tag "Save marks", class: "mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm text-white", name: nil %>
+<% end %>

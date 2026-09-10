@@ -1,0 +1,77 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">
+      Good <%= Time.current.hour < 12 ? "morning" : Time.current.hour < 17 ? "afternoon" : "evening" %>, <%= current_user.display_name %>
+    </h1>
+    <p class="mt-1 text-sm text-slate-500"><%= @today.strftime("%A, %-d %B %Y") %> · <%= current_academic_year&.name %></p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <% [["Admit student", new_student_path, "students.write"],
+        ["Mark attendance", attendance_path, "attendance.write"],
+        ["Collect fee", fees_path, "fees.collect"],
+        ["Post notice", new_notice_path, "notices.write"]].each do |label, path, perm| %>
+      <% if current_user.can?(perm) %>
+        <%= link_to label, path, class: "rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:border-slate-400 hover:bg-slate-50" %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <%= render "stat", label: "Students",    value: number_with_delimiter(@students), icon: "🎓", tint: "bg-blue-50 text-blue-700",
+             foot: "#{@sections} sections" %>
+  <%= render "stat", label: "Staff",       value: number_with_delimiter(@staff), icon: "👔", tint: "bg-violet-50 text-violet-700",
+             foot: "on the payroll" %>
+  <%= render "stat", label: "Collected this month", value: rupees_short(@collected_month), icon: "💰", tint: "bg-emerald-50 text-emerald-700",
+             foot: safe_join([delta_badge(@collected_month, @collected_prev), " vs last month"].compact) %>
+  <%= render "stat", label: "Outstanding", value: rupees_short(@outstanding), icon: "⏳", tint: "bg-amber-50 text-amber-700",
+             foot: "#{@overdue_count} invoices overdue" %>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <%= render "fee_chart" %>
+  <%= render "attendance_bar" %>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <section class="rounded-xl border border-slate-200 bg-white p-5 lg:col-span-2">
+    <h2 class="mb-4 text-sm font-semibold text-slate-900">Quick access</h2>
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+      <% nav_modules.each do |m| %>
+        <%= link_to m.path, class: "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium ring-1 ring-inset transition hover:brightness-95 #{group_tint(m.group)}" do %>
+          <span class="text-base leading-none"><%= m.icon %></span>
+          <span class="truncate"><%= m.name %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="space-y-6">
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+      <h2 class="mb-3 text-sm font-semibold text-slate-900">Latest receipts</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <% @payments.each do |p| %>
+          <li class="flex items-center justify-between gap-3 py-2">
+            <span class="min-w-0"><span class="block truncate font-medium"><%= p.fee_invoice.student.name %></span>
+              <span class="text-xs text-slate-500"><%= p.method %> · <%= p.paid_at.to_date == @today ? "today" : p.paid_at.to_date.strftime("%-d %b") %></span></span>
+            <span class="shrink-0 font-medium tabular-nums"><%= rupees(p.amount) %></span>
+          </li>
+        <% end %>
+        <% if @payments.empty? %><li class="py-2 text-slate-400">No payments yet.</li><% end %>
+      </ul>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+      <h2 class="mb-3 text-sm font-semibold text-slate-900">Notices</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <% @notices.each do |n| %>
+          <li class="py-2"><%= link_to n.title, n, class: "font-medium hover:underline" %>
+            <p class="text-xs text-slate-500"><%= truncate(n.body, length: 80) %></p></li>
+        <% end %>
+        <% if @notices.empty? %><li class="py-2 text-slate-400">Nothing posted.</li><% end %>
+      </ul>
+    </section>
+  </div>
+</div>

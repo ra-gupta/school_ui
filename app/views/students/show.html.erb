@@ -1,0 +1,63 @@
+<% content_for :title, @student.name %>
+<%= render "shared/header", title: @student.name, actions: (link_to("Edit", edit_student_path(@student), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm") if current_user.can?("students.write")) %>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h2 class="mb-3 text-sm font-semibold text-slate-700">Profile</h2>
+    <dl class="space-y-2 text-sm">
+      <% { "Admission no" => @student.admission_no, "Class" => @student.section&.full_name, "Roll no" => @enrollment&.roll_no,
+           "Date of birth" => @student.date_of_birth&.to_fs(:long), "Gender" => @student.gender&.humanize,
+           "Blood group" => @student.blood_group, "House" => @student.house, "Phone" => @student.phone,
+           "Address" => @student.address, "Status" => @student.status.humanize }.each do |k, v| %>
+        <div class="flex justify-between gap-4"><dt class="text-slate-500"><%= k %></dt><dd class="text-right"><%= v.presence || "—" %></dd></div>
+      <% end %>
+    </dl>
+    <h3 class="mt-5 mb-2 text-sm font-semibold text-slate-700">Guardians</h3>
+    <ul class="space-y-1 text-sm">
+      <% @student.guardians.each do |g| %>
+        <li><%= g.name %> <span class="text-slate-500">· <%= g.relation %> · <%= g.phone %></span></li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h2 class="mb-3 text-sm font-semibold text-slate-700">Attendance · last 30 days</h2>
+    <div class="flex flex-wrap gap-1">
+      <% @attendance.each do |a| %>
+        <span class="h-6 w-6 rounded text-center text-[10px] leading-6 text-white
+          <%= { "present" => "bg-emerald-500", "absent" => "bg-red-500", "late" => "bg-amber-500", "leave" => "bg-slate-400", "half_day" => "bg-sky-500", "holiday" => "bg-slate-200" }[a.status] %>"
+          title="<%= a.on_date.to_fs(:long) %> — <%= a.status %>"><%= a.on_date.day %></span>
+      <% end %>
+      <% if @attendance.empty? %><p class="text-sm text-slate-400">Nothing recorded.</p><% end %>
+    </div>
+
+    <h2 class="mt-5 mb-3 text-sm font-semibold text-slate-700">Results</h2>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @results.each do |r| %>
+          <tr><td class="py-1.5"><%= r.exam_schedule.subject.name %></td>
+              <td class="py-1.5 text-slate-500"><%= r.exam_schedule.exam.name %></td>
+              <td class="py-1.5 text-right font-medium"><%= r.absent? ? "AB" : "#{r.marks.to_i}/#{r.max_marks.to_i}" %></td>
+              <td class="py-1.5 pl-2 text-right"><%= r.grade %></td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h2 class="mb-3 text-sm font-semibold text-slate-700">Fees</h2>
+    <p class="mb-3 text-2xl font-semibold <%= "text-red-600" if @student.fees_due.positive? %>"><%= number_to_currency(@student.fees_due, unit: "₹", precision: 0) %> <span class="text-sm font-normal text-slate-500">due</span></p>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @invoices.each do |i| %>
+          <tr>
+            <td class="py-1.5"><%= link_to i.number, fee_invoice_path(i), class: "font-mono text-xs hover:underline" %></td>
+            <td class="py-1.5 text-slate-500"><%= i.period %></td>
+            <td class="py-1.5 text-right"><%= number_to_currency(i.total, unit: "₹", precision: 0) %></td>
+            <td class="py-1.5 pl-2 text-right"><span class="rounded-full px-2 py-0.5 text-xs <%= i.status == "paid" ? "bg-emerald-100 text-emerald-700" : i.overdue? ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700" %>"><%= i.status %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</div>

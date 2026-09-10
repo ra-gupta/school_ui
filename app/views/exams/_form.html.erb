@@ -1,0 +1,11 @@
+<%= form_with model: @exam, class: "max-w-xl space-y-4 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <%= render "shared/errors", record: @exam %>
+  <label class="block"><span class="text-sm font-medium">Name</span><%= f.text_field :name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <label class="block"><span class="text-sm font-medium">Type</span><%= f.select :exam_type, %w[term unit final practical], {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="block"><span class="text-sm font-medium">Starts</span><%= f.date_field :starts_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Ends</span><%= f.date_field :ends_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  </div>
+  <label class="flex items-center gap-2"><%= f.check_box :published %><span class="text-sm">Publish results to parents</span></label>
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>

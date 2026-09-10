@@ -1,0 +1,58 @@
+<% content_for :title, "Academics" %>
+<%= render "shared/header", title: "Academics" %>
+<% writable = current_user.can?("academics.write") %>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h2 class="mb-3 text-sm font-semibold text-slate-700">Classes & sections</h2>
+    <% if writable %>
+      <div class="mb-4 flex flex-wrap gap-2">
+        <%= form_with model: @grade, class: "flex gap-2" do |f| %>
+          <%= f.text_field :name, placeholder: "Class 9", class: "w-32 rounded-lg border-slate-300 text-sm" %>
+          <%= f.number_field :level, placeholder: "9", class: "w-20 rounded-lg border-slate-300 text-sm" %>
+          <%= f.submit "Add class", class: "rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" %>
+        <% end %>
+        <%= form_with model: @section, class: "flex gap-2" do |f| %>
+          <%= f.collection_select :grade_id, Grade.ordered, :id, :name, { include_blank: "Class" }, class: "rounded-lg border-slate-300 text-sm" %>
+          <%= f.text_field :name, placeholder: "C", class: "w-16 rounded-lg border-slate-300 text-sm" %>
+          <%= f.submit "Add section", class: "rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" %>
+        <% end %>
+      </div>
+    <% end %>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @grades.each do |g| %>
+          <tr>
+            <td class="py-2 font-medium"><%= g.name %></td>
+            <td class="py-2 text-slate-500"><%= g.sections.map { |s| "#{s.name}#{" · #{s.class_teacher.name}" if s.class_teacher}" }.join(" | ").presence || "no sections" %></td>
+            <td class="py-2 text-right"><%= button_to "Remove", grade_path(g), method: :delete, class: "text-xs text-slate-400 hover:text-red-600" if writable %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h2 class="mb-3 text-sm font-semibold text-slate-700">Subjects</h2>
+    <% if writable %>
+      <%= form_with model: @subject, class: "mb-4 flex flex-wrap gap-2" do |f| %>
+        <%= f.text_field :name, placeholder: "Biology", class: "w-40 rounded-lg border-slate-300 text-sm" %>
+        <%= f.text_field :code, placeholder: "BIO", class: "w-24 rounded-lg border-slate-300 text-sm" %>
+        <%= f.select :subject_type, %w[theory practical], {}, class: "rounded-lg border-slate-300 text-sm" %>
+        <%= f.submit "Add", class: "rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" %>
+      <% end %>
+    <% end %>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @subjects.each do |s| %>
+          <tr>
+            <td class="py-2 font-medium"><%= s.name %></td>
+            <td class="py-2 text-slate-500"><%= s.code %></td>
+            <td class="py-2 text-slate-500"><%= s.subject_type %></td>
+            <td class="py-2 text-right"><%= button_to "Remove", subject_path(s), method: :delete, class: "text-xs text-slate-400 hover:text-red-600" if writable %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</div>

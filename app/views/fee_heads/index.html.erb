@@ -1,0 +1,20 @@
+<% content_for :title, "Fee heads" %>
+<%= render "shared/header", title: "Fee heads" %>
+<div class="max-w-lg space-y-4">
+  <% if current_user.can?("fees.write") %>
+    <%= form_with url: fee_heads_path, scope: :fee_head, class: "flex gap-2" do |f| %>
+      <%= f.text_field :name, placeholder: "e.g. Laboratory", class: "flex-1 rounded-lg border-slate-300 text-sm" %>
+      <%= f.submit "Add", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+    <% end %>
+  <% end %>
+  <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <% @fee_heads.each do |h| %>
+      <li class="flex items-center justify-between p-3 text-sm">
+        <span><%= h.name %></span>
+        <% if current_user.can?("fees.write") %>
+          <%= button_to "Remove", fee_head_path(h), method: :delete, class: "text-xs text-slate-400 hover:text-red-600" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</div>

@@ -1,0 +1,51 @@
+<% content_for :title, "Attendance" %>
+<%= render "shared/header", title: "Attendance" %>
+
+<%= form_with url: attendance_path, method: :get, class: "mb-4 flex flex-wrap gap-2" do %>
+  <%= select_tag :section_id, options_from_collection_for_select(@sections, :id, :full_name, @section&.id), class: "rounded-lg border-slate-300 text-sm" %>
+  <%= date_field_tag :date, @date, max: Date.current, class: "rounded-lg border-slate-300 text-sm" %>
+  <%= submit_tag "Show", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm", name: nil %>
+<% end %>
+
+<% if @summary.any? %>
+  <div class="mb-4 flex gap-2 text-sm">
+    <% @summary.each do |status, count| %>
+      <span class="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200"><%= status.humanize %>: <strong><%= count %></strong></span>
+    <% end %>
+  </div>
+<% end %>
+
+<%= form_with url: attendance_path, method: :patch do %>
+  <%= hidden_field_tag :section_id, @section&.id %>
+  <%= hidden_field_tag :date, @date %>
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <tr><th class="p-3">Roll</th><th class="p-3">Student</th><th class="p-3">Status</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% @enrollments.each do |e| %>
+          <% current = @marked[e.student_id]&.status || "present" %>
+          <tr>
+            <td class="p-3 text-slate-500"><%= e.roll_no %></td>
+            <td class="p-3 font-medium"><%= e.student.name %></td>
+            <td class="p-3">
+              <div class="flex flex-wrap gap-3">
+                <% Attendance::STATUSES.take(5).each do |status| %>
+                  <label class="flex items-center gap-1.5">
+                    <%= radio_button_tag "attendance[#{e.student_id}]", status, current == status, id: "a_#{e.student_id}_#{status}" %>
+                    <span class="text-xs"><%= status.humanize %></span>
+                  </label>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        <% if @enrollments.empty? %><tr><td colspan="3" class="p-8 text-center text-slate-400">No students in this section.</td></tr><% end %>
+      </tbody>
+    </table>
+  </div>
+  <% if current_user.can?("attendance.write") && @enrollments.any? %>
+    <%= submit_tag "Save attendance", class: "mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm text-white", name: nil %>
+  <% end %>
+<% end %>

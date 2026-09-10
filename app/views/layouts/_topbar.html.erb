@@ -1,0 +1,13 @@
+<header class="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+  <div class="text-sm text-slate-500">
+    <%= current_academic_year&.name %>
+    <% if current_user.super_admin? && current_school %>
+      · <%= button_to "leave school", leave_schools_path, method: :delete, class: "underline" %>
+    <% end %>
+  </div>
+  <div class="flex items-center gap-4 text-sm">
+    <span class="font-medium"><%= current_user.display_name %></span>
+    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"><%= current_user.kind.humanize %></span>
+    <%= button_to "Sign out", session_path, method: :delete, class: "text-slate-500 hover:text-slate-900" %>
+  </div>
+</header>

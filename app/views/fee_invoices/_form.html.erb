@@ -1,0 +1,30 @@
+<%= form_with model: @invoice, class: "space-y-6" do |f| %>
+  <%= render "shared/errors", record: @invoice %>
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="grid gap-4 sm:grid-cols-4">
+      <label class="block sm:col-span-2"><span class="text-sm font-medium">Student</span>
+        <%= f.collection_select :student_id, Student.active.order(:first_name), :id, ->(s) { "#{s.name} · #{s.admission_no}" }, { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Period</span><%= f.text_field :period, placeholder: "2026-09", class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Issue date</span><%= f.date_field :issue_date, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Due date</span><%= f.date_field :due_date, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Discount</span><%= f.number_field :discount, step: 0.01, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Fine</span><%= f.number_field :fine, step: 0.01, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    </div>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="mb-4 text-sm font-semibold text-slate-700">Line items</h2>
+    <%= f.fields_for :fee_invoice_items do |i| %>
+      <div class="mb-3 grid gap-3 sm:grid-cols-4">
+        <%= i.collection_select :fee_head_id, FeeHead.order(:name), :id, :name, { include_blank: "Head" }, class: "rounded-lg border-slate-300" %>
+        <%= i.text_field :description, placeholder: "Description", class: "sm:col-span-2 rounded-lg border-slate-300" %>
+        <%= i.number_field :amount, step: 0.01, placeholder: "Amount", class: "rounded-lg border-slate-300" %>
+      </div>
+    <% end %>
+  </section>
+
+  <div class="flex gap-3">
+    <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+    <%= link_to "Cancel", fees_path, class: "rounded-lg border border-slate-300 px-4 py-2 text-sm" %>
+  </div>
+<% end %>

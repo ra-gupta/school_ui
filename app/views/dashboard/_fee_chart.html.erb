@@ -1,0 +1,36 @@
+<section class="rounded-xl border border-slate-200 bg-white p-5 lg:col-span-2">
+  <div class="mb-1 flex items-baseline justify-between">
+    <h2 class="text-sm font-semibold text-slate-900">Fee collection · last 30 days</h2>
+    <span class="text-xs text-slate-500">Today <%= rupees(@collected_today) %></span>
+  </div>
+  <% days = (0..29).map { |n| (@today - (29 - n)) }
+     values = days.map { @collections_by_day[it].to_f }
+     peak = [values.max, 1].max %>
+  <p class="mb-4 text-3xl font-semibold tracking-tight"><%= rupees_short(values.sum) %></p>
+
+  <div class="relative h-44">
+    <% 3.downto(0) do |i| %>
+      <div class="absolute inset-x-0 flex items-center" style="bottom: <%= i * 33.33 %>%">
+        <span class="w-12 shrink-0 text-right text-[10px] tabular-nums text-slate-400"><%= rupees_short(peak * i / 3.0) %></span>
+        <span class="ml-2 h-px flex-1" style="background: var(--gridline)"></span>
+      </div>
+    <% end %>
+
+    <div class="absolute inset-y-0 left-14 right-0 flex items-end gap-[2px]">
+      <% days.each_with_index do |day, i| %>
+        <div class="group relative flex h-full flex-1 items-end">
+          <div class="w-full rounded-t transition-colors"
+               style="height: <%= [(values[i] / peak * 100).round(1), 1.5].max %>%; background: var(--series-<%= values[i].zero? ? "1-dim" : "1" %>)"></div>
+          <div class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[11px] text-white group-hover:block">
+            <%= day.strftime("%-d %b") %> · <%= rupees(values[i]) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="mt-2 flex justify-between pl-14 text-[10px] text-slate-400">
+    <span><%= days.first.strftime("%-d %b") %></span>
+    <span><%= days[14].strftime("%-d %b") %></span>
+    <span><%= days.last.strftime("%-d %b") %></span>
+  </div>
+</section>

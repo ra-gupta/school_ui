@@ -1,0 +1,53 @@
+<% content_for :title, @invoice.number %>
+<%= render "shared/header", title: @invoice.number, actions: (link_to("Edit", edit_fee_invoice_path(@invoice), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm") if current_user.can?("fees.write")) %>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="rounded-xl border border-slate-200 bg-white p-5 lg:col-span-2">
+    <div class="mb-4 flex justify-between text-sm">
+      <div><p class="font-medium"><%= link_to @invoice.student.name, @invoice.student, class: "hover:underline" %></p>
+           <p class="text-slate-500"><%= @invoice.student.section&.full_name %> · <%= @invoice.student.admission_no %></p></div>
+      <div class="text-right text-slate-500"><p>Issued <%= @invoice.issue_date.to_fs(:long) %></p><p>Due <%= @invoice.due_date.to_fs(:long) %></p></div>
+    </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @invoice.fee_invoice_items.each do |item| %>
+          <tr><td class="py-2"><%= item.description %></td><td class="py-2 text-right"><%= number_to_currency(item.amount, unit: "₹", precision: 0) %></td></tr>
+        <% end %>
+        <tr class="font-medium"><td class="py-2">Total</td><td class="py-2 text-right"><%= number_to_currency(@invoice.total, unit: "₹", precision: 0) %></td></tr>
+        <% if @invoice.discount.positive? %><tr><td class="py-2 text-slate-500">Discount</td><td class="py-2 text-right">−<%= number_to_currency(@invoice.discount, unit: "₹", precision: 0) %></td></tr><% end %>
+        <% if @invoice.fine.positive? %><tr><td class="py-2 text-slate-500">Fine</td><td class="py-2 text-right"><%= number_to_currency(@invoice.fine, unit: "₹", precision: 0) %></td></tr><% end %>
+        <tr><td class="py-2 text-slate-500">Paid</td><td class="py-2 text-right">−<%= number_to_currency(@invoice.paid, unit: "₹", precision: 0) %></td></tr>
+        <tr class="text-lg font-semibold"><td class="py-2">Balance</td><td class="py-2 text-right <%= "text-red-600" if @invoice.balance.positive? %>"><%= number_to_currency(@invoice.balance, unit: "₹", precision: 0) %></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="space-y-6">
+    <% if current_user.can?("fees.collect") && @invoice.balance.positive? %>
+      <section class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="mb-3 text-sm font-semibold text-slate-700">Collect payment</h2>
+        <%= form_with model: [@invoice, @payment], url: fee_invoice_fee_payments_path(@invoice), class: "space-y-3" do |f| %>
+          <label class="block"><span class="text-sm">Amount</span><%= f.number_field :amount, step: 0.01, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+          <label class="block"><span class="text-sm">Method</span><%= f.select :method, FeePayment::METHODS, {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+          <label class="block"><span class="text-sm">Reference</span><%= f.text_field :reference, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+          <%= f.submit "Record payment", class: "w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white" %>
+        <% end %>
+      </section>
+    <% end %>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+      <h2 class="mb-3 text-sm font-semibold text-slate-700">Payments</h2>
+      <ul class="space-y-2 text-sm">
+        <% @invoice.fee_payments.order(paid_at: :desc).each do |p| %>
+          <li class="flex justify-between gap-2">
+            <span><%= number_to_currency(p.amount, unit: "₹", precision: 0) %> <span class="text-slate-500">· <%= p.method %> · <%= p.paid_at.to_date.to_fs(:long) %></span></span>
+            <% if current_user.can?("fees.collect") %>
+              <%= button_to "↺", fee_invoice_fee_payment_path(@invoice, p), method: :delete, class: "text-slate-400 hover:text-red-600", form: { data: { turbo_confirm: "Reverse this payment?" } } %>
+            <% end %>
+          </li>
+        <% end %>
+        <% if @invoice.fee_payments.empty? %><li class="text-slate-400">Nothing collected yet.</li><% end %>
+      </ul>
+    </section>
+  </div>
+</div>

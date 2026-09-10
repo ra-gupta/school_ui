@@ -1,0 +1,26 @@
+<%= form_with model: @staff, class: "space-y-6" do |f| %>
+  <%= render "shared/errors", record: @staff %>
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+      <label class="block"><span class="text-sm font-medium">Employee no</span><%= f.text_field :employee_no, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">First name</span><%= f.text_field :first_name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Last name</span><%= f.text_field :last_name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Designation</span><%= f.text_field :designation, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Department</span><%= f.collection_select :department_id, Department.order(:name), :id, :name, { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Joining date</span><%= f.date_field :joining_date, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Date of birth</span><%= f.date_field :date_of_birth, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Gender</span><%= f.select :gender, %w[male female other], { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Phone</span><%= f.telephone_field :phone, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Email</span><%= f.email_field :email, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Qualification</span><%= f.text_field :qualification, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Basic salary</span><%= f.number_field :basic_salary, step: 1, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Biometric ID</span><%= f.text_field :biometric_id, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Status</span><%= f.select :status, %w[active inactive], {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block sm:col-span-3"><span class="text-sm font-medium">Address</span><%= f.text_area :address, rows: 2, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    </div>
+  </section>
+  <div class="flex gap-3">
+    <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+    <%= link_to "Cancel", staffs_path, class: "rounded-lg border border-slate-300 px-4 py-2 text-sm" %>
+  </div>
+<% end %>

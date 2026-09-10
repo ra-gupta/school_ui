@@ -1,0 +1,43 @@
+<%= form_with model: @student, class: "space-y-6" do |f| %>
+  <%= render "shared/errors", record: @student %>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="mb-4 text-sm font-semibold text-slate-700">Student</h2>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <label class="block"><span class="text-sm font-medium">Admission no</span><%= f.text_field :admission_no, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">First name</span><%= f.text_field :first_name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Last name</span><%= f.text_field :last_name, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Date of birth</span><%= f.date_field :date_of_birth, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Gender</span><%= f.select :gender, %w[male female other], { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Blood group</span><%= f.select :blood_group, %w[A+ A- B+ B- O+ O- AB+ AB-], { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Admission date</span><%= f.date_field :admission_date, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Class</span>
+        <%= select_tag :section_id, options_from_collection_for_select(Section.includes(:grade).order("grades.level", :name), :id, :full_name, @student.section&.id), include_blank: "—", class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Roll no</span><%= text_field_tag :roll_no, @student.current_enrollment&.roll_no, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Phone</span><%= f.telephone_field :phone, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Email</span><%= f.email_field :email, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">House</span><%= f.text_field :house, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Biometric ID</span><%= f.text_field :biometric_id, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block"><span class="text-sm font-medium">Status</span><%= f.select :status, %w[active alumni left suspended], {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+      <label class="block sm:col-span-3"><span class="text-sm font-medium">Address</span><%= f.text_area :address, rows: 2, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    </div>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="mb-4 text-sm font-semibold text-slate-700">Guardians</h2>
+    <%= f.fields_for :guardians do |g| %>
+      <div class="mb-3 grid gap-4 sm:grid-cols-5">
+        <%= g.text_field :name, placeholder: "Name", class: "rounded-lg border-slate-300" %>
+        <%= g.text_field :relation, placeholder: "Relation", class: "rounded-lg border-slate-300" %>
+        <%= g.telephone_field :phone, placeholder: "Phone", class: "rounded-lg border-slate-300" %>
+        <%= g.email_field :email, placeholder: "Email", class: "rounded-lg border-slate-300" %>
+        <%= g.text_field :occupation, placeholder: "Occupation", class: "rounded-lg border-slate-300" %>
+      </div>
+    <% end %>
+  </section>
+
+  <div class="flex gap-3">
+    <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+    <%= link_to "Cancel", students_path, class: "rounded-lg border border-slate-300 px-4 py-2 text-sm" %>
+  </div>
+<% end %>

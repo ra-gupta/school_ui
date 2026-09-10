@@ -1,0 +1,12 @@
+<%= form_with model: @notice, class: "max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <%= render "shared/errors", record: @notice %>
+  <label class="block"><span class="text-sm font-medium">Title</span><%= f.text_field :title, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <label class="block"><span class="text-sm font-medium">Body</span><%= f.text_area :body, rows: 6, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <label class="block"><span class="text-sm font-medium">Audience</span><%= f.select :audience, Notice::AUDIENCES, {}, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Section (if targeted)</span><%= f.collection_select :section_id, Section.includes(:grade).order("grades.level", :name), :id, :full_name, { include_blank: true }, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+    <label class="block"><span class="text-sm font-medium">Expires on</span><%= f.date_field :expires_on, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  </div>
+  <label class="block"><span class="text-sm font-medium">Publish at</span><%= f.datetime_field :published_at, class: "mt-1 w-full rounded-lg border-slate-300" %></label>
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>

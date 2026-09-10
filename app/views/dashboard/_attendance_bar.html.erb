@@ -1,0 +1,32 @@
+<section class="rounded-xl border border-slate-200 bg-white p-5">
+  <h2 class="text-sm font-semibold text-slate-900">Attendance today</h2>
+  <% order = [["present", "var(--st-good)", "✓"], ["late", "var(--st-warning)", "◷"],
+              ["absent", "var(--st-critical)", "✕"], ["leave", "var(--st-serious)", "◐"]]
+     total = [@marked, 1].max
+     rate  = (@attendance.values_at("present", "late", "half_day").compact.sum / total.to_f * 100).round %>
+
+  <p class="mt-2 text-3xl font-semibold tracking-tight"><%= @marked.zero? ? "—" : "#{rate}%" %></p>
+  <p class="mb-4 text-xs text-slate-500"><%= @marked %> of <%= @students %> students marked</p>
+
+  <div class="flex h-3 gap-[2px] overflow-hidden rounded-full">
+    <% order.each do |status, colour, _| %>
+      <% count = @attendance[status].to_i %>
+      <% next if count.zero? %>
+      <div style="width: <%= (count / total.to_f * 100).round(2) %>%; background: <%= colour %>"
+           title="<%= status.humanize %>: <%= count %>"></div>
+    <% end %>
+    <% if @marked.zero? %><div class="flex-1 bg-slate-200"></div><% end %>
+  </div>
+
+  <ul class="mt-4 space-y-2 text-sm">
+    <% order.each do |status, colour, glyph| %>
+      <li class="flex items-center justify-between gap-2">
+        <span class="flex items-center gap-2">
+          <span class="grid h-4 w-4 place-items-center rounded text-[9px] font-bold text-white" style="background: <%= colour %>"><%= glyph %></span>
+          <span class="text-slate-600"><%= status.humanize %></span>
+        </span>
+        <span class="tabular-nums font-medium"><%= @attendance[status].to_i %></span>
+      </li>
+    <% end %>
+  </ul>
+</section>

@@ -1,0 +1,41 @@
+<% content_for :title, @exam.name %>
+<%= render "shared/header", title: @exam.name, actions: (link_to("Edit", edit_exam_path(@exam), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm") if current_user.can?("exams.write")) %>
+
+<% if current_user.can?("exams.write") %>
+  <%= form_with model: [@exam, @schedule], class: "mb-4 flex flex-wrap gap-2" do |f| %>
+    <%= f.collection_select :section_id, @sections, :id, :full_name, { include_blank: "Class" }, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.collection_select :subject_id, @subjects, :id, :name, { include_blank: "Subject" }, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.date_field :on_date, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.time_field :starts_at, class: "rounded-lg border-slate-300 text-sm" %>
+    <%= f.number_field :max_marks, placeholder: "Max", class: "w-24 rounded-lg border-slate-300 text-sm" %>
+    <%= f.submit "Add paper", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+  <% end %>
+<% end %>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <tr><th class="p-3">Date</th><th class="p-3">Class</th><th class="p-3">Subject</th><th class="p-3">Max</th><th class="p-3">Entered</th><th></th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @schedules.each do |s| %>
+        <tr>
+          <td class="p-3 text-slate-500"><%= s.on_date&.to_fs(:long) %></td>
+          <td class="p-3"><%= s.section.full_name %></td>
+          <td class="p-3 font-medium"><%= s.subject.name %></td>
+          <td class="p-3 text-slate-500"><%= s.max_marks.to_i %></td>
+          <td class="p-3 text-slate-500"><%= s.exam_results.size %></td>
+          <td class="p-3 text-right">
+            <% if current_user.can?("exams.update") %>
+              <%= link_to "Enter marks", exam_marks_path(@exam, exam_schedule_id: s.id), class: "text-xs underline" %>
+            <% end %>
+            <% if current_user.can?("exams.write") %>
+              <%= button_to "Remove", exam_exam_schedule_path(@exam, s), method: :delete, class: "ml-2 inline text-xs text-slate-400 hover:text-red-600" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @schedules.empty? %><tr><td colspan="6" class="p-8 text-center text-slate-400">No papers scheduled.</td></tr><% end %>
+    </tbody>
+  </table>
+</div>

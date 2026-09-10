@@ -1,0 +1,6 @@
+<% content_for :title, @notice.title %>
+<%= render "shared/header", title: @notice.title, actions: (link_to("Edit", edit_notice_path(@notice), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm") if current_user.can?("notices.write")) %>
+<article class="max-w-2xl rounded-xl border border-slate-200 bg-white p-6">
+  <p class="text-xs text-slate-500"><%= @notice.audience %> · <%= @notice.published_at&.to_fs(:long) %> · <%= @notice.created_by&.display_name %></p>
+  <p class="mt-4 whitespace-pre-line text-sm"><%= @notice.body %></p>
+</article>

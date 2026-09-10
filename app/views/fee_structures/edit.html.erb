@@ -1,0 +1,11 @@
+<% content_for :title, "Edit fee" %>
+<h1 class="mb-6 text-2xl font-semibold">Edit fee</h1>
+<%= form_with model: @structure, class: "max-w-lg space-y-4 rounded-xl border border-slate-200 bg-white p-6" do |f| %>
+  <%= render "shared/errors", record: @structure %>
+  <%= f.collection_select :grade_id, Grade.ordered, :id, :name, {}, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.collection_select :fee_head_id, FeeHead.order(:name), :id, :name, {}, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.number_field :amount, step: 0.01, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.select :frequency, FeeStructure::FREQUENCIES, {}, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.number_field :due_day, in: 1..28, class: "w-full rounded-lg border-slate-300" %>
+  <%= f.submit class: "rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" %>
+<% end %>
