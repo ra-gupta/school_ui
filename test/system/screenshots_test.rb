@@ -69,7 +69,7 @@ class ScreenshotsTest < ApplicationSystemTestCase
 
   def sign_in(email, password = "password")
     visit "/session/new"
-    fill_in "email_address", with: email
+    fill_in "login", with: email
     fill_in "password", with: password
     click_on "Sign in"
     assert_text User.find_by(email_address: email).name

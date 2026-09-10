@@ -6,7 +6,9 @@ module Api
                  with: -> { render json: { error: "too_many_attempts" }, status: :too_many_requests }
 
       def create
-        user = User.active.authenticate_by(params.permit(:email_address, :password).to_h.symbolize_keys)
+        # `login` is an email address or a mobile number; email_address is kept
+        # so an app built against the earlier shape keeps working.
+        user = User.authenticate_by_login(params[:login] || params[:email_address], params[:password])
         return render_error("invalid_credentials", :unauthorized) unless user
 
         session = user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip)

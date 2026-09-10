@@ -2,8 +2,6 @@ require "test_helper"
 
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    # The users fixture was removed when the schema grew NOT NULL name/kind
-    # columns, so these build the account they need.
     @user = User.create!(name: "Platform Admin", email_address: "admin@erp.test",
                          kind: "super_admin", password: "password")
   end
