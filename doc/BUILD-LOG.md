@@ -3,7 +3,6 @@
 Rebuild of the "Multi-School ERP" product (multischoolerp.com — Laravel 12 + Flutter, 38 modules,
 6 apps) as **Rails 8 + Flutter**. Running record of decisions, gotchas, and where to pick up.
 
-Last session: 2026-09-09.
 
 ---
 
@@ -31,21 +30,44 @@ gives exactly and for free. Its registry entry is removed; 43 modules remain.
 
 ## Where to pick up
 
-**Next task: build the remaining 35 web modules on the `Manageable` foundation, then the Flutter app.**
+Last session: 2026-09-10. `main` is green, no open branches, no open PRs.
 
-The generic CRUD + API foundation is written and loads clean (`bin/rails zeitwerk:check` passes),
-but **nothing uses it yet**:
+**All 43 web modules are built.** The next piece is the **Flutter app**, and it is blocked on
+nothing — the API is already in place (auth incl. mobile-number login, dashboard shaped per
+role, attendance marking, fees + payment, timetable, chat, driver GPS, plus generic JSON CRUD
+for every `manage`d model). Flutter 3.47.2 is installed at `~/flutter` (add `~/flutter/bin`
+to PATH).
 
-- [ ] No routes for `/api/v1/*` — the API controllers exist but are unreachable. Add the namespace,
-      including `post "session"`, `get "me"`, and the catch-all `:resource` routes.
-- [ ] No model calls `manage ...` yet, and no `ResourceController` subclass exists.
-- [ ] Dashboard was redesigned (charts, quick-access grid) and the `_stat` partial bug was fixed,
-      but **the screenshot suite has not been re-run since** — verify first thing.
+**Two decisions were still open when we stopped:**
 
-Per-module work is now: a migration + a model with a `manage` block + a two-line controller +
-one route line. Views and JSON come free.
+1. **SMS / WhatsApp vendor** — MSG91 or Gupshup (India-focused, cheaper at volume) versus
+   Twilio (one vendor for both, easier setup, pricier). Real delivery on those channels is
+   blocked on this; the adapter is one class either way
+   (`app/services/notifications/sms_channel.rb`).
+2. **Whether to start the Flutter app** before or after wiring that vendor.
 
----
+### Known gaps, in rough priority order
+
+- **No device-token store**, so push resolves to no address and is skipped. Build it with the
+  Flutter app — it is the reason push exists.
+- **Password reset is email-only.** A parent who signs in with a mobile number and has no
+  email address cannot reset their own password. Needs an SMS OTP path, so it waits on the
+  vendor decision.
+- **Bus proximity is a straight-line distance and a linear scan** over the vehicle's stops,
+  run on every driver ping. Fine at a handful of stops; `ponytail:` comment carries the
+  upgrade path.
+- **No deploy setup.** The app was generated with `--skip-kamal --skip-docker`, and CI has no
+  deploy job for that reason.
+- **Screenshots are in `main`'s history** from the first import, though no longer tracked.
+  Removing them needs another history rewrite — offered, not done.
+
+### How this repo is worked
+
+Branch → PR → CI green → merge → delete branch. Git identity is **repo-local**
+(`Rahul Gupta <rahul.r.gupta97@gmail.com>`); the global config is deliberately untouched.
+**No `Co-Authored-By` trailers.** Screenshots go to `tmp/screenshots/` and are never
+committed.
+
 
 ## Decisions
 
@@ -135,26 +157,41 @@ Validator: `dataviz` skill's `scripts/validate_palette.js` (copy it into a dir w
 
 ## State
 
-### Done — Phase 1, the spine
-Multi-tenancy (`Tenanted` + `Current.school`), Rails 8 auth, RBAC, Apps Center registry
-(`config/modules.yml`, 44 modules), and the domain: schools, academic years, grades/sections/
-subjects, students + guardians, staff + departments, enrollments, attendance + biometric devices/
-punches, fees (heads → structures → invoices → payments), timetable, exams + results, homework,
-notices.
+### The spine
+Multi-tenancy (`Tenanted` + `Current.school`), Rails 8 auth with mobile-number login, RBAC
+(`text[]` of `module.action` + `User#can?`), and the Apps Center registry
+(`config/modules.yml`, 43 modules).
 
-### Done — 38 of 44 modules
-Students, Academics, Attendance, Exams, Fees, HR/Staff, Homework, Timetable, Notices, plus the
-super-admin school switcher. 21 screens, all covered by `bin/rails test:system`.
+### One declaration per module
+A model's `manage` block states its columns, form fields, search and ordering.
+`ResourceController` renders it as HTML (subclasses inherit `app/views/resource/*` through
+Rails' view inheritance) and `Api::V1::ResourcesController` serves the same declaration as
+JSON — so a module cannot have a web screen the app's API lacks. Adding one is a migration,
+a `manage` block, a two-line controller and a route line.
 
-### Written but unwired
-`Manageable` concern, `ResourceController` + `app/views/resource/*`, `Api::V1::{Base,Sessions,
-Users,Resources}Controller`. Loads clean; no routes, no subclasses, no `manage` declarations.
+### All 43 modules built
+Core: students, academics, attendance, exams, fees, HR, homework, timetable, notices.
+Operations: library, transport + live GPS, hostel, inventory, asset register, front office,
+gate pass, health, CCTV, campus workers, biometric devices.
+People & finance: admissions CRM, certificates, ID cards, payroll, accounts.
+Communications: messaging, PTM, surveys, knowledge base, website pages, greetings, chat.
+Academic: online exams (CBT), lesson planner, CBC assessment, live classes, study centre,
+digital evaluation.
+System: compliance, support tickets, backups, storage centre, reports + CSV export.
+
+Plus the super-admin school switcher, the dashboard, and notifications (see above).
+~60 screens, every one covered by `bin/rails test:system`.
+
+### JSON API
+`/api/v1` — Bearer token is the signed id of an ordinary `Session` row, so web and app
+sessions are the same object and revoking one revokes both. Bespoke endpoints for login,
+`me`, a role-shaped dashboard, attendance marking, timetable, fees + payment, chat and
+driver GPS; generic CRUD for every `manage`d model.
 
 ### Not started
-The other 35 modules, the Flutter app, the ZKTeco `/iclock/cdata` endpoint, payment gateways,
-file uploads (ActiveStorage), PDF receipts/report cards, push notifications, parent-teacher chat.
-
-Flutter 3.47.2 is installed at `~/flutter` (add `~/flutter/bin` to PATH).
+The Flutter app. The ZKTeco `/iclock/cdata` ADMS endpoint (Rails can serve it directly — no
+Windows agent). Payment gateway integration (the fee flow records payments but does not take
+them). PDF receipts and report cards.
 
 ---
 
