@@ -127,7 +127,8 @@ ActiveRecord::Base.transaction do
 
       if n < 20
         pu = User.find_or_initialize_by(email_address: guardian.email, school_id: school.id)
-        pu.update!(name: guardian.name, kind: "parent", password: SEED_PASSWORD, phone: guardian.phone)
+        pu.update!(name: guardian.name, kind: "parent", password: SEED_PASSWORD, phone: guardian.phone,
+                   notification_channels: %w[email sms])
         pu.roles = [ roles["Parent"] ]
         guardian.update!(user: pu)
       end

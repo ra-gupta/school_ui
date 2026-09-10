@@ -10,6 +10,12 @@
 #     schedule: at 5am every day
 
 production:
+  # Reminds about fees falling due in three days. The job dedupes per invoice
+  # per person, so running it daily nags once rather than every morning.
+  fee_reminders:
+    class: Notifications::FeeReminderJob
+    schedule: at 7am every day
+
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12

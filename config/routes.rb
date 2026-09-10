@@ -146,6 +146,7 @@ Rails.application.routes.draw do
   resources :backup_runs, path: "backups"
   resources :stored_files, path: "storage"
   resource  :reports, only: :show, path: "reports"
+  resource  :notification_preferences, only: [ :show, :update ], path: "alerts"
 
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do

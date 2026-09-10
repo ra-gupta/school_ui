@@ -7,6 +7,28 @@ Last session: 2026-09-09.
 
 ---
 
+## Notifications
+
+Events are catalogued in `SchoolEvent`; `Notifications::Notifier` renders the school's
+template for an event and channel (falling back to the event's default wording) and queues
+one `MessageLog` per reachable channel, which `Notifications::DeliveryJob` then delivers.
+
+- **Adding a vendor is one class.** `Notifications::Channel` subclasses implement `#deliver`.
+  Email works today; SMS, WhatsApp and push raise `NotConfigured` until an account is
+  chosen, and the job **discards** rather than retries on that — an unconfigured school
+  must not fill the queue.
+- **`dedupe_key` is the "tell them once" mechanism**, enforced by a partial unique index on
+  `(school_id, user_id, channel, dedupe_key)`. Every trigger needs this guard; doing it in
+  the database makes it exact and race-free instead of each job inventing its own query.
+- **Preferences are two array columns on `users`** (`notification_channels`, `muted_events`),
+  not a preferences table — until per-event channel choice is actually asked for.
+- Push has no device-token store yet, so it resolves to no address and is skipped rather
+  than queued to fail. That store is part of the Flutter work.
+
+**The AI assistant was built and then dropped** (PR #7, closed) — per-question cost, an
+external dependency, a key to rotate, and a leak surface, for answers the dashboard already
+gives exactly and for free. Its registry entry is removed; 43 modules remain.
+
 ## Where to pick up
 
 **Next task: build the remaining 35 web modules on the `Manageable` foundation, then the Flutter app.**
@@ -102,6 +124,10 @@ Validator: `dataviz` skill's `scripts/validate_palette.js` (copy it into a dir w
   and friends are reached only through a tenant-scoped parent, so they are not `Tenanted` and a
   bare `ExamSchedule.limit(6)` crosses schools. Scope through the parent
   (`ExamSchedule.where(exam_id: Exam.ids)`), not by luck.
+- **Constants inside a `Data.define` block land on `Object`, not the class.** `SchoolModule`
+  and `SchoolEvent` both declared `ALL`, and the second to load silently clobbered the
+  first — `SchoolModule.all` started returning events. Declare them in a reopened
+  `class Foo ... end` body instead. The screenshot suite caught this; nothing else would have.
 - **`bin/rails zeitwerk:check`** is the cheap way to catch class-body errors without a 2-minute
   Selenium run. Use it after writing controllers.
 

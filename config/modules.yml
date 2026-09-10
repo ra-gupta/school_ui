@@ -37,7 +37,6 @@ surveys:       { name: Surveys & Feedback,  icon: "🗳️", group: Comms }
 knowledge_base: { name: Knowledge Base,      icon: "❓", group: Comms , path: "/knowledge-base" }
 website:       { name: Website Builder,     icon: "🌐", group: Comms }
 engagement:    { name: Engagement & Cards,  icon: "🎉", group: Comms }
-ai_assistant:  { name: AI Assistant,        icon: "🤖", group: System , path: "/ai-assistant" }
 biometrics:    { name: Biometric Devices,   icon: "🖐️", group: System }
 compliance:    { name: Compliance,          icon: "⚖️", group: System }
 reports:       { name: Reports & Export,    icon: "📈", group: System }

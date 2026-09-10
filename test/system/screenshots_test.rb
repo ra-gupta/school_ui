@@ -49,6 +49,7 @@ class ScreenshotsTest < ApplicationSystemTestCase
     shot "notices",        "/notices"
     shot "notice_show",    "/notices/#{Notice.live.first.id}"
     shot "academics",      "/academics"
+    shot "alerts",         "/alerts"
 
     # Every enabled module's landing page, straight from the registry — a new
     # module is smoke-tested and screenshotted without touching this file.

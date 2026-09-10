@@ -67,4 +67,11 @@ class User < ApplicationRecord
   end
 
   def display_name = name.presence || email_address
+
+  def muted?(event) = muted_events.include?(event.to_s)
+
+  # A channel is only usable if we hold the address it needs.
+  def reachable_channels
+    notification_channels.select { it == "email" ? email_address.present? : phone.present? }
+  end
 end
