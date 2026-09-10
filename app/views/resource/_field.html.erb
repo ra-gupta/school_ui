@@ -11,6 +11,10 @@
   <% when :time %><%= f.time_field field.name, required:, class: classes %>
   <% when :email %><%= f.email_field field.name, required:, class: classes %>
   <% when :tel %><%= f.telephone_field field.name, required:, class: classes %>
+  <% when :file %><%= f.file_field field.name, required: required && !f.object.public_send(field.name).attached?, class: "mt-1 w-full text-sm" %>
+    <% if f.object.persisted? && f.object.public_send(field.name).attached? %>
+      <span class="mt-1 block text-xs text-slate-500">Attached: <%= f.object.public_send(field.name).filename %></span>
+    <% end %>
   <% when :boolean %><%= f.select field.name, [["Yes", true], ["No", false]], {}, class: classes %>
   <% when :select %><%= f.select field.name, field.options, { include_blank: !required }, class: classes %>
   <% when :belongs_to %>

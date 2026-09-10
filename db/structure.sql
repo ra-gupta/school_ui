@@ -57,6 +57,105 @@ ALTER SEQUENCE public.academic_years_id_seq OWNED BY public.academic_years.id;
 
 
 --
+-- Name: active_storage_attachments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_attachments (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    record_type character varying NOT NULL,
+    record_id bigint NOT NULL,
+    blob_id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_attachments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_attachments_id_seq OWNED BY public.active_storage_attachments.id;
+
+
+--
+-- Name: active_storage_blobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_blobs (
+    id bigint NOT NULL,
+    key character varying NOT NULL,
+    filename character varying NOT NULL,
+    content_type character varying,
+    metadata text,
+    service_name character varying NOT NULL,
+    byte_size bigint NOT NULL,
+    checksum character varying,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: active_storage_blobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_blobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_blobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_blobs_id_seq OWNED BY public.active_storage_blobs.id;
+
+
+--
+-- Name: active_storage_variant_records; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_storage_variant_records (
+    id bigint NOT NULL,
+    blob_id bigint NOT NULL,
+    variation_digest character varying NOT NULL
+);
+
+
+--
+-- Name: active_storage_variant_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_storage_variant_records_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_storage_variant_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_storage_variant_records_id_seq OWNED BY public.active_storage_variant_records.id;
+
+
+--
 -- Name: admission_enquiries; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -191,6 +290,44 @@ CREATE SEQUENCE public.attendances_id_seq
 --
 
 ALTER SEQUENCE public.attendances_id_seq OWNED BY public.attendances.id;
+
+
+--
+-- Name: backup_runs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.backup_runs (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    destination character varying DEFAULT 'local'::character varying NOT NULL,
+    kind character varying DEFAULT 'full'::character varying NOT NULL,
+    started_at timestamp(6) without time zone NOT NULL,
+    finished_at timestamp(6) without time zone,
+    size_bytes bigint,
+    status character varying DEFAULT 'running'::character varying NOT NULL,
+    error character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: backup_runs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.backup_runs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: backup_runs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.backup_runs_id_seq OWNED BY public.backup_runs.id;
 
 
 --
@@ -560,6 +697,46 @@ CREATE SEQUENCE public.competency_scores_id_seq
 --
 
 ALTER SEQUENCE public.competency_scores_id_seq OWNED BY public.competency_scores.id;
+
+
+--
+-- Name: compliance_documents; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.compliance_documents (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    owner_id bigint,
+    title character varying NOT NULL,
+    category character varying,
+    authority character varying,
+    reference_no character varying,
+    issued_on date,
+    expires_on date,
+    status character varying DEFAULT 'valid'::character varying NOT NULL,
+    notes text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: compliance_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.compliance_documents_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: compliance_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.compliance_documents_id_seq OWNED BY public.compliance_documents.id;
 
 
 --
@@ -2341,6 +2518,42 @@ ALTER SEQUENCE public.stock_movements_id_seq OWNED BY public.stock_movements.id;
 
 
 --
+-- Name: stored_files; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.stored_files (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    uploaded_by_id bigint,
+    title character varying NOT NULL,
+    folder character varying DEFAULT 'General'::character varying NOT NULL,
+    visibility character varying DEFAULT 'staff'::character varying NOT NULL,
+    description text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: stored_files_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.stored_files_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: stored_files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.stored_files_id_seq OWNED BY public.stored_files.id;
+
+
+--
 -- Name: students; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2497,6 +2710,45 @@ CREATE SEQUENCE public.subjects_id_seq
 --
 
 ALTER SEQUENCE public.subjects_id_seq OWNED BY public.subjects.id;
+
+
+--
+-- Name: support_tickets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.support_tickets (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    raised_by_id bigint,
+    assigned_to_id bigint,
+    subject character varying NOT NULL,
+    body text,
+    category character varying,
+    priority character varying DEFAULT 'normal'::character varying NOT NULL,
+    status character varying DEFAULT 'open'::character varying NOT NULL,
+    resolved_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: support_tickets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.support_tickets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: support_tickets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.support_tickets_id_seq OWNED BY public.support_tickets.id;
 
 
 --
@@ -2995,6 +3247,27 @@ ALTER TABLE ONLY public.academic_years ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: active_storage_attachments id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments ALTER COLUMN id SET DEFAULT nextval('public.active_storage_attachments_id_seq'::regclass);
+
+
+--
+-- Name: active_storage_blobs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_blobs ALTER COLUMN id SET DEFAULT nextval('public.active_storage_blobs_id_seq'::regclass);
+
+
+--
+-- Name: active_storage_variant_records id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records ALTER COLUMN id SET DEFAULT nextval('public.active_storage_variant_records_id_seq'::regclass);
+
+
+--
 -- Name: admission_enquiries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3013,6 +3286,13 @@ ALTER TABLE ONLY public.assets ALTER COLUMN id SET DEFAULT nextval('public.asset
 --
 
 ALTER TABLE ONLY public.attendances ALTER COLUMN id SET DEFAULT nextval('public.attendances_id_seq'::regclass);
+
+
+--
+-- Name: backup_runs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.backup_runs ALTER COLUMN id SET DEFAULT nextval('public.backup_runs_id_seq'::regclass);
 
 
 --
@@ -3083,6 +3363,13 @@ ALTER TABLE ONLY public.competencies ALTER COLUMN id SET DEFAULT nextval('public
 --
 
 ALTER TABLE ONLY public.competency_scores ALTER COLUMN id SET DEFAULT nextval('public.competency_scores_id_seq'::regclass);
+
+
+--
+-- Name: compliance_documents id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.compliance_documents ALTER COLUMN id SET DEFAULT nextval('public.compliance_documents_id_seq'::regclass);
 
 
 --
@@ -3415,6 +3702,13 @@ ALTER TABLE ONLY public.stock_movements ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: stored_files id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stored_files ALTER COLUMN id SET DEFAULT nextval('public.stored_files_id_seq'::regclass);
+
+
+--
 -- Name: students id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3440,6 +3734,13 @@ ALTER TABLE ONLY public.subject_assignments ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY public.subjects ALTER COLUMN id SET DEFAULT nextval('public.subjects_id_seq'::regclass);
+
+
+--
+-- Name: support_tickets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.support_tickets ALTER COLUMN id SET DEFAULT nextval('public.support_tickets_id_seq'::regclass);
 
 
 --
@@ -3542,6 +3843,30 @@ ALTER TABLE ONLY public.academic_years
 
 
 --
+-- Name: active_storage_attachments active_storage_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT active_storage_attachments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_blobs active_storage_blobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_blobs
+    ADD CONSTRAINT active_storage_blobs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: active_storage_variant_records active_storage_variant_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT active_storage_variant_records_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: admission_enquiries admission_enquiries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3571,6 +3896,14 @@ ALTER TABLE ONLY public.assets
 
 ALTER TABLE ONLY public.attendances
     ADD CONSTRAINT attendances_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: backup_runs backup_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.backup_runs
+    ADD CONSTRAINT backup_runs_pkey PRIMARY KEY (id);
 
 
 --
@@ -3651,6 +3984,14 @@ ALTER TABLE ONLY public.competencies
 
 ALTER TABLE ONLY public.competency_scores
     ADD CONSTRAINT competency_scores_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: compliance_documents compliance_documents_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.compliance_documents
+    ADD CONSTRAINT compliance_documents_pkey PRIMARY KEY (id);
 
 
 --
@@ -4038,6 +4379,14 @@ ALTER TABLE ONLY public.stock_movements
 
 
 --
+-- Name: stored_files stored_files_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stored_files
+    ADD CONSTRAINT stored_files_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: students students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4067,6 +4416,14 @@ ALTER TABLE ONLY public.subject_assignments
 
 ALTER TABLE ONLY public.subjects
     ADD CONSTRAINT subjects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: support_tickets support_tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.support_tickets
+    ADD CONSTRAINT support_tickets_pkey PRIMARY KEY (id);
 
 
 --
@@ -4258,6 +4615,34 @@ CREATE UNIQUE INDEX index_academic_years_on_school_id_and_name ON public.academi
 
 
 --
+-- Name: index_active_storage_attachments_on_blob_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_active_storage_attachments_on_blob_id ON public.active_storage_attachments USING btree (blob_id);
+
+
+--
+-- Name: index_active_storage_attachments_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_attachments_uniqueness ON public.active_storage_attachments USING btree (record_type, record_id, name, blob_id);
+
+
+--
+-- Name: index_active_storage_blobs_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_blobs_on_key ON public.active_storage_blobs USING btree (key);
+
+
+--
+-- Name: index_active_storage_variant_records_uniqueness; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_active_storage_variant_records_uniqueness ON public.active_storage_variant_records USING btree (blob_id, variation_digest);
+
+
+--
 -- Name: index_admission_enquiries_on_assigned_to_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4346,6 +4731,20 @@ CREATE INDEX index_attendances_on_school_id_and_on_date ON public.attendances US
 --
 
 CREATE INDEX index_attendances_on_section_id ON public.attendances USING btree (section_id);
+
+
+--
+-- Name: index_backup_runs_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_backup_runs_on_school_id ON public.backup_runs USING btree (school_id);
+
+
+--
+-- Name: index_backup_runs_on_school_id_and_started_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_backup_runs_on_school_id_and_started_at ON public.backup_runs USING btree (school_id, started_at);
 
 
 --
@@ -4535,6 +4934,27 @@ CREATE INDEX index_competency_scores_on_school_id ON public.competency_scores US
 --
 
 CREATE INDEX index_competency_scores_on_student_id ON public.competency_scores USING btree (student_id);
+
+
+--
+-- Name: index_compliance_documents_on_owner_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_compliance_documents_on_owner_id ON public.compliance_documents USING btree (owner_id);
+
+
+--
+-- Name: index_compliance_documents_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_compliance_documents_on_school_id ON public.compliance_documents USING btree (school_id);
+
+
+--
+-- Name: index_compliance_documents_on_school_id_and_expires_on; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_compliance_documents_on_school_id_and_expires_on ON public.compliance_documents USING btree (school_id, expires_on);
 
 
 --
@@ -5553,6 +5973,27 @@ CREATE INDEX index_stock_movements_on_school_id ON public.stock_movements USING 
 
 
 --
+-- Name: index_stored_files_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_stored_files_on_school_id ON public.stored_files USING btree (school_id);
+
+
+--
+-- Name: index_stored_files_on_school_id_and_folder; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_stored_files_on_school_id_and_folder ON public.stored_files USING btree (school_id, folder);
+
+
+--
+-- Name: index_stored_files_on_uploaded_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_stored_files_on_uploaded_by_id ON public.stored_files USING btree (uploaded_by_id);
+
+
+--
 -- Name: index_students_on_school_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5662,6 +6103,34 @@ CREATE INDEX index_subjects_on_school_id ON public.subjects USING btree (school_
 --
 
 CREATE INDEX index_subjects_on_school_id_and_code ON public.subjects USING btree (school_id, code);
+
+
+--
+-- Name: index_support_tickets_on_assigned_to_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_support_tickets_on_assigned_to_id ON public.support_tickets USING btree (assigned_to_id);
+
+
+--
+-- Name: index_support_tickets_on_raised_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_support_tickets_on_raised_by_id ON public.support_tickets USING btree (raised_by_id);
+
+
+--
+-- Name: index_support_tickets_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_support_tickets_on_school_id ON public.support_tickets USING btree (school_id);
+
+
+--
+-- Name: index_support_tickets_on_school_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_support_tickets_on_school_id_and_status ON public.support_tickets USING btree (school_id, status);
 
 
 --
@@ -6026,6 +6495,14 @@ ALTER TABLE ONLY public.fee_invoice_items
 
 
 --
+-- Name: stored_files fk_rails_0efa7fa20c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stored_files
+    ADD CONSTRAINT fk_rails_0efa7fa20c FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: evaluations fk_rails_112c4a47ec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6178,6 +6655,14 @@ ALTER TABLE ONLY public.issued_certificates
 
 
 --
+-- Name: compliance_documents fk_rails_285eba1db6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.compliance_documents
+    ADD CONSTRAINT fk_rails_285eba1db6 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: live_classes fk_rails_28e661aec8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6191,6 +6676,14 @@ ALTER TABLE ONLY public.live_classes
 
 ALTER TABLE ONLY public.fee_invoices
     ADD CONSTRAINT fk_rails_2947516f49 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: backup_runs fk_rails_29fe8abccf; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.backup_runs
+    ADD CONSTRAINT fk_rails_29fe8abccf FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -6434,6 +6927,14 @@ ALTER TABLE ONLY public.cameras
 
 
 --
+-- Name: compliance_documents fk_rails_50d988b895; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.compliance_documents
+    ADD CONSTRAINT fk_rails_50d988b895 FOREIGN KEY (owner_id) REFERENCES public.staffs(id);
+
+
+--
 -- Name: ledger_entries fk_rails_542d5ae6d9; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6535,6 +7036,14 @@ ALTER TABLE ONLY public.test_attempts
 
 ALTER TABLE ONLY public.admission_enquiries
     ADD CONSTRAINT fk_rails_6573417436 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: support_tickets fk_rails_675898ed34; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.support_tickets
+    ADD CONSTRAINT fk_rails_675898ed34 FOREIGN KEY (assigned_to_id) REFERENCES public.users(id);
 
 
 --
@@ -6882,6 +7391,14 @@ ALTER TABLE ONLY public.grades
 
 
 --
+-- Name: active_storage_variant_records fk_rails_993965df05; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_variant_records
+    ADD CONSTRAINT fk_rails_993965df05 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
+
+
+--
 -- Name: gate_passes fk_rails_9ba3267816; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6911,6 +7428,14 @@ ALTER TABLE ONLY public.visitors
 
 ALTER TABLE ONLY public.admission_enquiries
     ADD CONSTRAINT fk_rails_9e55aeac97 FOREIGN KEY (assigned_to_id) REFERENCES public.users(id);
+
+
+--
+-- Name: support_tickets fk_rails_a0c7f7a0e3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.support_tickets
+    ADD CONSTRAINT fk_rails_a0c7f7a0e3 FOREIGN KEY (raised_by_id) REFERENCES public.users(id);
 
 
 --
@@ -7026,6 +7551,14 @@ ALTER TABLE ONLY public.ptm_slots
 
 
 --
+-- Name: stored_files fk_rails_bd7aee9e24; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stored_files
+    ADD CONSTRAINT fk_rails_bd7aee9e24 FOREIGN KEY (uploaded_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: homeworks fk_rails_bf610ddb0f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7047,6 +7580,14 @@ ALTER TABLE ONLY public.web_pages
 
 ALTER TABLE ONLY public.live_classes
     ADD CONSTRAINT fk_rails_c32149e4bb FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
+
+
+--
+-- Name: active_storage_attachments fk_rails_c3b3935057; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_storage_attachments
+    ADD CONSTRAINT fk_rails_c3b3935057 FOREIGN KEY (blob_id) REFERENCES public.active_storage_blobs(id);
 
 
 --
@@ -7087,6 +7628,14 @@ ALTER TABLE ONLY public.conversations
 
 ALTER TABLE ONLY public.issued_certificates
     ADD CONSTRAINT fk_rails_c5cb9d496d FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
+-- Name: support_tickets fk_rails_cc2d7c61f4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.support_tickets
+    ADD CONSTRAINT fk_rails_cc2d7c61f4 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -7416,6 +7965,8 @@ ALTER TABLE ONLY public.test_questions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260910140000'),
+('20260910130001'),
 ('20260910130000'),
 ('20260910120000'),
 ('20260910110000'),

@@ -141,6 +141,12 @@ Rails.application.routes.draw do
   resources :study_materials, path: "study-center"
   resources :evaluations, path: "digital-evaluation"
 
+  resources :compliance_documents, path: "compliance"
+  resources :support_tickets, path: "support"
+  resources :backup_runs, path: "backups"
+  resources :stored_files, path: "storage"
+  resource  :reports, only: :show, path: "reports"
+
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do
     namespace :v1 do
