@@ -58,7 +58,7 @@ ActiveRecord::Base.transaction do
     teachers = 12.times.map do |n|
       user = User.find_or_initialize_by(email_address: "teacher#{n + 1}@#{attrs[:subdomain]}.test", school_id: school.id)
       user.update!(name: "#{%w[Priya Amit Sneha Vikas Meera Rohit Kavya Arjun Divya Nikhil Pooja Sanjay][n]} #{%w[Patil Joshi Rao Nair Desai Iyer Kulkarni Menon Shah Gupta Reddy Verma][n]}",
-                   kind: "teacher", password: SEED_PASSWORD, phone: "+9198#{format("%08d", n)}")
+                   kind: "teacher", password: SEED_PASSWORD, phone: "+9198#{idx}#{format("%07d", n)}")
       user.roles = [ roles["Teacher"] ]
       staff = Staff.find_or_initialize_by(employee_no: "EMP#{format("%03d", n + 1)}")
       staff.update!(user:, first_name: user.name.split.first, last_name: user.name.split.last,
@@ -110,11 +110,20 @@ ActiveRecord::Base.transaction do
                       address: "#{rand(1..99)} MG Road, #{attrs[:city]}")
 
       guardian = Guardian.find_or_initialize_by(name: "#{last_names[n % last_names.size]} Parent #{n + 1}")
-      guardian.update!(relation: n.even? ? "Father" : "Mother", phone: "+9199#{format("%08d", n)}",
+      guardian.update!(relation: n.even? ? "Father" : "Mother", phone: "+9199#{idx}#{format("%07d", n)}",
                        email: "parent#{n + 1}@#{attrs[:subdomain]}.test", occupation: %w[Engineer Teacher Doctor Business].sample)
       Guardianship.find_or_create_by!(guardian:, student:) { it.primary_contact = true }
 
-      if n < 20 # give the first 20 parents a real login
+      if n < 20 # first 20 families get real logins — parent and student
+        student.update!(phone: "+9197#{idx}#{format("%07d", n)}")
+        su = User.find_or_initialize_by(email_address: "student#{idx}#{n}@#{attrs[:subdomain]}.test")
+        su.update!(name: student.name, kind: "student", password: SEED_PASSWORD,
+                   phone: student.phone, school: school)
+        su.roles = [ roles["Student"] ]
+        student.update!(user: su)
+      end
+
+      if n < 20
         pu = User.find_or_initialize_by(email_address: guardian.email, school_id: school.id)
         pu.update!(name: guardian.name, kind: "parent", password: SEED_PASSWORD, phone: guardian.phone)
         pu.roles = [ roles["Parent"] ]

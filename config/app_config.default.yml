@@ -15,6 +15,10 @@ default:
   # the application itself runs in.
   time_zone: <%= ENV.fetch("TIME_ZONE", "Asia/Kolkata") %>
 
+  # Applied to any sign-in number typed without one, so a parent can enter the
+  # ten digits they know. Change it for a school outside India.
+  default_country_code: "<%= ENV.fetch("DEFAULT_COUNTRY_CODE", "+91") %>"
+
   # Rows per page in every list screen and in the JSON API's default page size.
   per_page: <%= ENV.fetch("PER_PAGE", 25) %>
 

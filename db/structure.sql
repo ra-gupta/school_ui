@@ -5065,6 +5065,13 @@ CREATE UNIQUE INDEX index_users_on_email_address ON public.users USING btree (em
 
 
 --
+-- Name: index_users_on_phone; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_phone ON public.users USING btree (phone) WHERE (phone IS NOT NULL);
+
+
+--
 -- Name: index_users_on_school_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6363,6 +6370,7 @@ ALTER TABLE ONLY public.book_issues
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260910120000'),
 ('20260910110000'),
 ('20260910100000'),
 ('20260910090000'),
