@@ -1,0 +1,34 @@
+<% content_for :title, "Live tracking" %>
+<%= render "shared/header", title: "Live tracking" %>
+
+<div class="grid gap-4 lg:grid-cols-2">
+  <% @vehicles.each do |v| %>
+    <% fix = @latest[v.id] %>
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="font-medium"><%= v.registration_no %> <span class="text-slate-500"><%= v.model %></span></p>
+          <p class="text-xs text-slate-500">
+            <%= v.driver&.name || "no driver assigned" %>
+            <%= "· #{v.transport_routes.map(&:name).join(", ")}" if v.transport_routes.any? %>
+          </p>
+        </div>
+        <% if fix %>
+          <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+            <%= time_ago_in_words(fix.recorded_at) %> ago<%= " · #{fix.speed.to_i} km/h" if fix.speed %>
+          </span>
+        <% else %>
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">No signal</span>
+        <% end %>
+      </div>
+      <% if fix %>
+        <%# OpenStreetMap's own embed — a live map with no JS and no dependency. %>
+        <iframe class="h-56 w-full border-0" loading="lazy" title="Location of <%= v.registration_no %>"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=<%= fix.longitude - 0.01 %>,<%= fix.latitude - 0.008 %>,<%= fix.longitude + 0.01 %>,<%= fix.latitude + 0.008 %>&marker=<%= fix.latitude %>,<%= fix.longitude %>"></iframe>
+      <% else %>
+        <div class="grid h-56 place-items-center bg-slate-50 text-sm text-slate-400">Waiting for the driver app to report in</div>
+      <% end %>
+    </section>
+  <% end %>
+  <% if @vehicles.empty? %><p class="text-slate-400">No vehicles yet.</p><% end %>
+</div>
