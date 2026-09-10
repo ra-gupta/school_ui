@@ -68,15 +68,36 @@ class ScreenshotsTest < ApplicationSystemTestCase
   private
 
   def sign_in(email, password = "password")
-    visit "/session/new"
-    fill_in "login", with: email
-    fill_in "password", with: password
-    click_on "Sign in"
+    steady do
+      visit "/session/new"
+      # Wait for this page's own document before touching a field: Capybara can
+      # otherwise resolve one on the outgoing page and lose the node handle
+      # while the browser navigates.
+      assert_selector "form input[name='login']"
+      fill_in "login", with: email
+      fill_in "password", with: password
+      click_on "Sign in"
+    end
     assert_text User.find_by(email_address: email).name
   end
 
+  # Chrome sometimes drops a node handle mid-navigation and reports "Node with
+  # given id does not belong to the document". It is a race inside the driver,
+  # not a fault on the page, so the step is retried once from the top. Any other
+  # error is left alone — this must not paper over a real breakage.
+  def steady
+    attempts = 0
+    begin
+      yield
+    rescue Selenium::WebDriver::Error::UnknownError => e
+      raise unless e.message.include?("does not belong to the document")
+      raise if (attempts += 1) > 1
+      retry
+    end
+  end
+
   def shot(name, path)
-    visit path
+    steady { visit path }
     assert page.has_no_text?("permission to do that", wait: 0), "#{name} (#{path}) was denied"
     assert page.has_no_text?("something went wrong", wait: 0), "#{name} (#{path}) errored"
     page.save_screenshot(OUT.join("#{name}.png").to_s)
