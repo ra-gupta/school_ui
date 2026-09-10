@@ -4,8 +4,8 @@ module Api
     # web UI renders, so a new module gets an API for free.
     class ResourcesController < BaseController
       before_action :set_model
-      before_action :authorize_read,  only: [:index, :show]
-      before_action :authorize_write, except: [:index, :show]
+      before_action :authorize_read,  only: [ :index, :show ]
+      before_action :authorize_write, except: [ :index, :show ]
 
       def index
         scope = @model.all
@@ -38,8 +38,8 @@ module Api
       def resource_config = @model.manage_config
 
       def set_model
-        @model = params[:resource].to_s.classify.safe_constantize
-        raise ActiveRecord::RecordNotFound unless @model.respond_to?(:manageable?) && @model.manageable?
+        @model = Manageable[params[:resource]]
+        raise ActiveRecord::RecordNotFound unless @model
       end
 
       def authorize_read  = authorize!("#{resource_config[:module_key]}.read")
@@ -57,7 +57,7 @@ module Api
       # screen needs without an extra round trip.
       def serialize(record)
         labels = resource_config[:fields].select(&:belongs_to?).to_h do |f|
-          [f.name, record.public_send(f.name).then { it && (it.try(:name) || it.try(:title) || it.try(:full_name)) }]
+          [ f.name, record.public_send(f.name).then { it && (it.try(:name) || it.try(:title) || it.try(:full_name)) } ]
         end
         record.as_json.merge("labels" => labels)
       end

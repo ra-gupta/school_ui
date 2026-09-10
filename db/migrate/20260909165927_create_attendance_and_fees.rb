@@ -13,8 +13,8 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.time    :check_out
       t.string  :remarks
       t.timestamps
-      t.index [:attendable_type, :attendable_id, :on_date], unique: true, name: "idx_attendance_unique"
-      t.index [:school_id, :on_date]
+      t.index [ :attendable_type, :attendable_id, :on_date ], unique: true, name: "idx_attendance_unique"
+      t.index [ :school_id, :on_date ]
     end
 
     create_table :biometric_devices do |t|
@@ -38,7 +38,7 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.integer  :verify_mode
       t.boolean  :processed, default: false, null: false
       t.timestamps
-      t.index [:biometric_device_id, :biometric_id, :punched_at], unique: true, name: "idx_punch_dedupe"
+      t.index [ :biometric_device_id, :biometric_id, :punched_at ], unique: true, name: "idx_punch_dedupe"
     end
 
     create_table :fee_heads do |t|
@@ -46,7 +46,7 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.string  :name, null: false
       t.string  :code
       t.timestamps
-      t.index [:school_id, :name], unique: true
+      t.index [ :school_id, :name ], unique: true
     end
 
     create_table :fee_structures do |t|
@@ -58,7 +58,7 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.string  :frequency, default: "monthly", null: false # monthly quarterly annual one_time
       t.integer :due_day, default: 10, null: false
       t.timestamps
-      t.index [:academic_year_id, :grade_id, :fee_head_id], unique: true, name: "idx_fee_structure_unique"
+      t.index [ :academic_year_id, :grade_id, :fee_head_id ], unique: true, name: "idx_fee_structure_unique"
     end
 
     create_table :fee_invoices do |t|
@@ -75,8 +75,8 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.decimal :paid,     precision: 12, scale: 2, default: 0, null: false
       t.string  :status, default: "unpaid", null: false # unpaid partial paid cancelled
       t.timestamps
-      t.index [:school_id, :number], unique: true
-      t.index [:student_id, :status]
+      t.index [ :school_id, :number ], unique: true
+      t.index [ :student_id, :status ]
     end
 
     create_table :fee_invoice_items do |t|
@@ -99,7 +99,7 @@ class CreateAttendanceAndFees < ActiveRecord::Migration[8.1]
       t.string   :status, default: "success", null: false
       t.datetime :paid_at, null: false
       t.timestamps
-      t.index [:school_id, :paid_at]
+      t.index [ :school_id, :paid_at ]
     end
   end
 end

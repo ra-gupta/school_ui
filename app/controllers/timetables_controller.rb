@@ -8,6 +8,6 @@ class TimetablesController < ApplicationController
     @section  = @sections.find_by(id: params[:section_id]) || @sections.first
     slots     = @section ? @section.timetable_slots.includes(:subject, :staff) : TimetableSlot.none
     @by_day   = slots.group_by(&:weekday)
-    @periods  = slots.map { |s| [s.starts_at, s.ends_at] }.uniq.sort_by(&:first)
+    @periods  = slots.map { |s| [ s.starts_at, s.ends_at ] }.uniq.sort_by(&:first)
   end
 end

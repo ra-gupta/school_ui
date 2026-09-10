@@ -21,7 +21,7 @@ class Student < ApplicationRecord
     )
   }
 
-  def name = [first_name, last_name].compact_blank.join(" ")
+  def name = [ first_name, last_name ].compact_blank.join(" ")
   def current_enrollment = enrollments.find_by(academic_year: Current.academic_year) || enrollments.order(:id).last
   def section = current_enrollment&.section
   def fees_due = fee_invoices.unpaid.sum(&:balance)

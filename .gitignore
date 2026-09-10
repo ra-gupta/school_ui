@@ -33,3 +33,11 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+
+# This machine's own Postgres credentials. Copy config/database.yml.example
+# to start one; CI uses config/database.yml.ci.
+/config/database.yml
+
+# This machine's own overrides. The committed fallbacks for every setting
+# live in config/app_config.default.yml.
+/config/app_config.yml

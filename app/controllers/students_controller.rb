@@ -1,7 +1,7 @@
 class StudentsController < ApplicationController
-  before_action :authorize_read, only: [:index, :show]
-  before_action :authorize_write, except: [:index, :show]
-  before_action :set_student, only: [:show, :edit, :update, :destroy]
+  before_action :authorize_read, only: [ :index, :show ]
+  before_action :authorize_write, except: [ :index, :show ]
+  before_action :set_student, only: [ :show, :edit, :update, :destroy ]
 
   def index
     scope = Student.search(params[:q]).where(status: params[:status].presence || "active")
@@ -14,7 +14,7 @@ class StudentsController < ApplicationController
     @enrollment  = @student.current_enrollment
     @attendance  = @student.attendances.where(on_date: 30.days.ago..).order(on_date: :desc)
     @invoices    = @student.fee_invoices.order(issue_date: :desc)
-    @results     = @student.exam_results.includes(exam_schedule: [:subject, :exam])
+    @results     = @student.exam_results.includes(exam_schedule: [ :subject, :exam ])
   end
 
   def new
@@ -63,9 +63,9 @@ class StudentsController < ApplicationController
   end
 
   def student_params
-    params.expect(student: [:admission_no, :first_name, :last_name, :date_of_birth, :gender, :blood_group,
+    params.expect(student: [ :admission_no, :first_name, :last_name, :date_of_birth, :gender, :blood_group,
                             :phone, :email, :address, :admission_date, :status, :house, :religion,
                             :category, :national_id, :biometric_id, :previous_school, :notes,
-                            guardians_attributes: [[:id, :name, :relation, :phone, :email, :occupation, :_destroy]]])
+                            guardians_attributes: [ [ :id, :name, :relation, :phone, :email, :occupation, :_destroy ] ] ])
   end
 end

@@ -4,7 +4,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.references :school, null: false, foreign_key: true
       t.string :name, null: false
       t.timestamps
-      t.index [:school_id, :name], unique: true
+      t.index [ :school_id, :name ], unique: true
     end
 
     create_table :staffs do |t|
@@ -27,8 +27,8 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.string  :status, default: "active", null: false
       t.jsonb   :custom_fields, default: {}, null: false
       t.timestamps
-      t.index [:school_id, :employee_no], unique: true
-      t.index [:school_id, :biometric_id]
+      t.index [ :school_id, :employee_no ], unique: true
+      t.index [ :school_id, :biometric_id ]
     end
 
     create_table :grades do |t|
@@ -36,7 +36,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.string  :name, null: false
       t.integer :level, null: false, default: 0
       t.timestamps
-      t.index [:school_id, :name], unique: true
+      t.index [ :school_id, :name ], unique: true
     end
 
     create_table :sections do |t|
@@ -47,7 +47,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.integer :capacity, default: 40, null: false
       t.string  :room
       t.timestamps
-      t.index [:grade_id, :name], unique: true
+      t.index [ :grade_id, :name ], unique: true
     end
 
     create_table :subjects do |t|
@@ -57,7 +57,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.string  :code
       t.string  :subject_type, default: "theory", null: false
       t.timestamps
-      t.index [:school_id, :code]
+      t.index [ :school_id, :code ]
     end
 
     create_table :subject_assignments do |t|
@@ -65,7 +65,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.references :subject, null: false, foreign_key: true
       t.references :staff, foreign_key: true
       t.timestamps
-      t.index [:section_id, :subject_id], unique: true
+      t.index [ :section_id, :subject_id ], unique: true
     end
 
     create_table :students do |t|
@@ -91,8 +91,8 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.text    :notes
       t.jsonb   :custom_fields, default: {}, null: false
       t.timestamps
-      t.index [:school_id, :admission_no], unique: true
-      t.index [:school_id, :biometric_id]
+      t.index [ :school_id, :admission_no ], unique: true
+      t.index [ :school_id, :biometric_id ]
     end
 
     create_table :guardians do |t|
@@ -112,7 +112,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.references :student, null: false, foreign_key: true
       t.boolean :primary_contact, default: false, null: false
       t.timestamps
-      t.index [:guardian_id, :student_id], unique: true
+      t.index [ :guardian_id, :student_id ], unique: true
     end
 
     create_table :enrollments do |t|
@@ -123,7 +123,7 @@ class CreatePeople < ActiveRecord::Migration[8.1]
       t.string  :roll_no
       t.string  :status, default: "active", null: false
       t.timestamps
-      t.index [:academic_year_id, :student_id], unique: true
+      t.index [ :academic_year_id, :student_id ], unique: true
     end
   end
 end

@@ -13,7 +13,7 @@ module Api
                               primary_color: school.primary_color, logo: nil },
           modules: SchoolModule.all.select { school&.module_enabled?(it.key) }
                                .map { { key: it.key, name: it.name, icon: it.icon, group: it.group } },
-          student_ids: user.student ? [user.student.id] : user.guardian&.students&.ids.to_a,
+          student_ids: user.student ? [ user.student.id ] : user.guardian&.students&.ids.to_a,
           staff_id: user.staff&.id
         }
       end

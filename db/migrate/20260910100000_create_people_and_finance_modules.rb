@@ -14,7 +14,7 @@ class CreatePeopleAndFinanceModules < ActiveRecord::Migration[8.1]
       t.date   :follow_up_on
       t.text   :notes
       t.timestamps
-      t.index [:school_id, :status]
+      t.index [ :school_id, :status ]
     end
 
     create_table :certificate_templates do |t|
@@ -34,7 +34,7 @@ class CreatePeopleAndFinanceModules < ActiveRecord::Migration[8.1]
       t.date   :issued_on, null: false
       t.text   :remarks
       t.timestamps
-      t.index [:school_id, :number], unique: true
+      t.index [ :school_id, :number ], unique: true
     end
 
     create_table :id_card_templates do |t|
@@ -60,7 +60,7 @@ class CreatePeopleAndFinanceModules < ActiveRecord::Migration[8.1]
       t.string  :status, default: "draft", null: false
       t.date    :paid_on
       t.timestamps
-      t.index [:staff_id, :period], unique: true
+      t.index [ :staff_id, :period ], unique: true
     end
 
     create_table :ledger_entries do |t|
@@ -74,7 +74,7 @@ class CreatePeopleAndFinanceModules < ActiveRecord::Migration[8.1]
       t.string  :payment_mode, default: "cash", null: false
       t.string  :reference
       t.timestamps
-      t.index [:school_id, :on_date]
+      t.index [ :school_id, :on_date ]
     end
   end
 end

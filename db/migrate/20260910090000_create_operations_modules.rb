@@ -13,8 +13,8 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.integer :available, default: 1, null: false
       t.decimal :price, precision: 10, scale: 2
       t.timestamps
-      t.index [:school_id, :isbn]
-      t.index [:school_id, :title]
+      t.index [ :school_id, :isbn ]
+      t.index [ :school_id, :title ]
     end
 
     create_table :book_issues do |t|
@@ -27,7 +27,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.date    :returned_on
       t.decimal :fine, precision: 8, scale: 2, default: 0, null: false
       t.timestamps
-      t.index [:school_id, :returned_on]
+      t.index [ :school_id, :returned_on ]
     end
 
     # --- Transport
@@ -42,7 +42,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.date    :fitness_expires_on
       t.string  :status, default: "active", null: false
       t.timestamps
-      t.index [:school_id, :registration_no], unique: true
+      t.index [ :school_id, :registration_no ], unique: true
     end
 
     create_table :transport_routes do |t|
@@ -72,9 +72,9 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.references :student, null: false, foreign_key: true
       t.references :transport_route, null: false, foreign_key: true
       t.references :route_stop, foreign_key: true
-      t.string  :direction, default: "both", null: false
+      t.string :direction, default: "both", null: false
       t.timestamps
-      t.index [:student_id, :transport_route_id], unique: true
+      t.index [ :student_id, :transport_route_id ], unique: true
     end
 
     # Driver pings; one row per fix, read back as the live trail.
@@ -87,7 +87,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.integer  :heading
       t.datetime :recorded_at, null: false
       t.timestamps
-      t.index [:vehicle_id, :recorded_at]
+      t.index [ :vehicle_id, :recorded_at ]
     end
 
     # --- Hostel
@@ -109,7 +109,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.integer :capacity, default: 2, null: false
       t.decimal :rent, precision: 10, scale: 2, default: 0, null: false
       t.timestamps
-      t.index [:hostel_id, :number], unique: true
+      t.index [ :hostel_id, :number ], unique: true
     end
 
     create_table :hostel_allocations do |t|
@@ -120,7 +120,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.date   :to_on
       t.string :bed_no
       t.timestamps
-      t.index [:student_id, :from_on]
+      t.index [ :student_id, :from_on ]
     end
 
     # --- Inventory
@@ -135,7 +135,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.decimal :unit_cost, precision: 10, scale: 2
       t.string  :store
       t.timestamps
-      t.index [:school_id, :name]
+      t.index [ :school_id, :name ]
     end
 
     create_table :stock_movements do |t|
@@ -163,7 +163,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.string  :status, default: "in_use", null: false
       t.date    :warranty_expires_on
       t.timestamps
-      t.index [:school_id, :code]
+      t.index [ :school_id, :code ]
     end
 
     # --- Front office
@@ -178,7 +178,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.datetime :in_at, null: false
       t.datetime :out_at
       t.timestamps
-      t.index [:school_id, :in_at]
+      t.index [ :school_id, :in_at ]
     end
 
     create_table :phone_logs do |t|
@@ -214,7 +214,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.datetime :in_at
       t.string   :status, default: "pending", null: false
       t.timestamps
-      t.index [:school_id, :status]
+      t.index [ :school_id, :status ]
     end
 
     # --- Health
@@ -230,7 +230,7 @@ class CreateOperationsModules < ActiveRecord::Migration[8.1]
       t.text    :allergies
       t.text    :notes
       t.timestamps
-      t.index [:student_id, :checked_on]
+      t.index [ :student_id, :checked_on ]
     end
 
     # --- CCTV

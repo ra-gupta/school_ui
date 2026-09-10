@@ -22,5 +22,5 @@ class GradesController < ApplicationController
 
   private
 
-  def record_params = params.expect(grade: [:name, :level])
+  def record_params = params.expect(grade: [ :name, :level ])
 end

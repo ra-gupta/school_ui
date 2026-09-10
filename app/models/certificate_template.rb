@@ -5,10 +5,10 @@ class CertificateTemplate < ApplicationRecord
   validates :name, presence: true
 
   manage module_key: "certificates", search: %w[name], order: { name: :asc },
-         columns: [:name, :kind],
-         fields: [{ name: :name, required: true },
+         columns: [ :name, :kind ],
+         fields: [ { name: :name, required: true },
                   { name: :kind, type: :select, options: %w[bonafide transfer character conduct completion] },
-                  { name: :body, type: :text }]
+                  { name: :body, type: :text } ]
 
   # {{student_name}} style placeholders, filled at issue time.
   def render_for(student)

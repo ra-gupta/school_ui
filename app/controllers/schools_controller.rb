@@ -34,8 +34,8 @@ class SchoolsController < ApplicationController
   end
 
   def school_params
-    params.expect(school: [:name, :code, :subdomain, :email, :phone, :address, :city, :state,
+    params.expect(school: [ :name, :code, :subdomain, :email, :phone, :address, :city, :state,
                            :timezone, :currency, :locale, :primary_color, :active,
-                           :subscription_ends_on, enabled_modules: []])
+                           :subscription_ends_on, enabled_modules: [] ])
   end
 end

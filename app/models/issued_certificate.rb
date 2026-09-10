@@ -12,11 +12,11 @@ class IssuedCertificate < ApplicationRecord
   end
 
   manage module_key: "certificates", search: %w[number], order: { issued_on: :desc },
-         columns: [:number, { name: :student, type: :belongs_to },
-                   { name: :certificate_template, type: :belongs_to }, { name: :issued_on, type: :date }],
-         fields: [{ name: :certificate_template, type: :belongs_to, required: true },
+         columns: [ :number, { name: :student, type: :belongs_to },
+                   { name: :certificate_template, type: :belongs_to }, { name: :issued_on, type: :date } ],
+         fields: [ { name: :certificate_template, type: :belongs_to, required: true },
                   { name: :student, type: :belongs_to, required: true, options: -> { Student.order(:first_name) } },
-                  { name: :issued_on, type: :date, required: true }, { name: :remarks, type: :text }]
+                  { name: :issued_on, type: :date, required: true }, { name: :remarks, type: :text } ]
 
   def name = number
   def body = certificate_template.render_for(student)

@@ -12,13 +12,13 @@ class StockMovement < ApplicationRecord
   after_destroy { inventory_item.decrement!(:quantity, signed_quantity) }
 
   manage module_key: "inventory", search: %w[reason], order: { on_date: :desc },
-         columns: [{ name: :inventory_item, type: :belongs_to }, :direction,
+         columns: [ { name: :inventory_item, type: :belongs_to }, :direction,
                    { name: :quantity, type: :number, align: :right }, :reason,
-                   { name: :on_date, type: :date }],
-         fields: [{ name: :inventory_item, type: :belongs_to, required: true },
+                   { name: :on_date, type: :date } ],
+         fields: [ { name: :inventory_item, type: :belongs_to, required: true },
                   { name: :direction, type: :select, options: %w[in out] },
                   { name: :quantity, type: :number, required: true }, :reason,
-                  { name: :on_date, type: :date, required: true }]
+                  { name: :on_date, type: :date, required: true } ]
 
   private
 

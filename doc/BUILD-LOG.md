@@ -126,7 +126,7 @@ Flutter 3.47.2 is installed at `~/flutter` (add `~/flutter/bin` to PATH).
 cd web
 bin/rails db:prepare db:seed
 bin/dev                      # http://localhost:3000
-bin/rails test:system        # smoke test + regenerates doc/screenshots/
+bin/rails test:system        # smoke test + regenerates tmp/screenshots/
 bin/rails zeitwerk:check     # fast "does everything load"
 ```
 

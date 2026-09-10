@@ -1,9 +1,10 @@
 # Idempotent demo data. bin/rails db:seed
 ActiveRecord::Base.transaction do
   Current.school = nil
+  SEED_PASSWORD = AppConfig.dig(:seed, :password)
 
-  super_admin = User.find_or_initialize_by(email_address: "super@erp.test", school_id: nil)
-  super_admin.update!(name: "Platform Admin", kind: "super_admin", password: "password")
+  super_admin = User.find_or_initialize_by(email_address: AppConfig.dig(:seed, :super_admin_email), school_id: nil)
+  super_admin.update!(name: "Platform Admin", kind: "super_admin", password: SEED_PASSWORD)
 
   # Optional modules that have a controller today. Grow this as modules land —
   # it keeps the sidebar from advertising screens that don't exist yet.
@@ -40,24 +41,24 @@ ActiveRecord::Base.transaction do
     roles = ROLE_PERMISSIONS.to_h do |name, perms|
       role = Role.find_or_initialize_by(name: name, school_id: school.id)
       role.update!(permissions: perms, system: true)
-      [name, role]
+      [ name, role ]
     end
 
     principal = User.find_or_initialize_by(email_address: "principal@#{attrs[:subdomain]}.test", school_id: school.id)
-    principal.update!(name: "Dr. #{%w[Anita Rajesh][idx]} Sharma", kind: "admin", password: "password")
-    principal.roles = [roles["Principal"]]
+    principal.update!(name: "Dr. #{%w[Anita Rajesh][idx]} Sharma", kind: "admin", password: SEED_PASSWORD)
+    principal.roles = [ roles["Principal"] ]
 
     departments = %w[Science Mathematics Languages Commerce Administration].map { Department.find_or_create_by!(name: it) }
     fee_heads = %w[Tuition Transport Library Examination Sports].map { FeeHead.find_or_create_by!(name: it) }
 
-    subjects = ["English", "Mathematics", "Science", "Social Studies", "Hindi", "Computer Science"]
+    subjects = [ "English", "Mathematics", "Science", "Social Studies", "Hindi", "Computer Science" ]
       .map { |name| Subject.find_or_create_by!(name:) { |s| s.code = name[0, 3].upcase } }
 
     teachers = 12.times.map do |n|
       user = User.find_or_initialize_by(email_address: "teacher#{n + 1}@#{attrs[:subdomain]}.test", school_id: school.id)
       user.update!(name: "#{%w[Priya Amit Sneha Vikas Meera Rohit Kavya Arjun Divya Nikhil Pooja Sanjay][n]} #{%w[Patil Joshi Rao Nair Desai Iyer Kulkarni Menon Shah Gupta Reddy Verma][n]}",
-                   kind: "teacher", password: "password", phone: "+9198#{format("%08d", n)}")
-      user.roles = [roles["Teacher"]]
+                   kind: "teacher", password: SEED_PASSWORD, phone: "+9198#{format("%08d", n)}")
+      user.roles = [ roles["Teacher"] ]
       staff = Staff.find_or_initialize_by(employee_no: "EMP#{format("%03d", n + 1)}")
       staff.update!(user:, first_name: user.name.split.first, last_name: user.name.split.last,
                     department: departments.sample, designation: "Teacher", joining_date: rand(1..8).years.ago.to_date,
@@ -114,8 +115,8 @@ ActiveRecord::Base.transaction do
 
       if n < 20 # give the first 20 parents a real login
         pu = User.find_or_initialize_by(email_address: guardian.email, school_id: school.id)
-        pu.update!(name: guardian.name, kind: "parent", password: "password", phone: guardian.phone)
-        pu.roles = [roles["Parent"]]
+        pu.update!(name: guardian.name, kind: "parent", password: SEED_PASSWORD, phone: guardian.phone)
+        pu.roles = [ roles["Parent"] ]
         guardian.update!(user: pu)
       end
 
@@ -152,7 +153,7 @@ ActiveRecord::Base.transaction do
         invoice.refresh_totals!
         if rand(100) < 78
           FeePayment.create!(fee_invoice: invoice, amount: invoice.balance, method: %w[cash upi online card].sample,
-                             received_by: principal, paid_at: [invoice.due_date - rand(0..8).days, Time.current].min,
+                             received_by: principal, paid_at: [ invoice.due_date - rand(0..8).days, Time.current ].min,
                              reference: SecureRandom.alphanumeric(8).upcase)
         end
       end
@@ -169,20 +170,20 @@ ActiveRecord::Base.transaction do
       end
     end
 
-    [["Annual Sports Day", "Sports day on the 24th. Students report in house colours by 8am."],
-     ["Fee reminder", "Tuition fees for this month are due on the 10th. Pay via the parent app to avoid a late fine."],
-     ["PTM Schedule", "Parent-teacher meetings this Saturday, 9am–1pm. Slots open in the app."]].each do |title, body|
+    [ [ "Annual Sports Day", "Sports day on the 24th. Students report in house colours by 8am." ],
+     [ "Fee reminder", "Tuition fees for this month are due on the 10th. Pay via the parent app to avoid a late fine." ],
+     [ "PTM Schedule", "Parent-teacher meetings this Saturday, 9am–1pm. Slots open in the app." ] ].each do |title, body|
       n = Notice.find_or_initialize_by(title:)
       n.update!(body:, audience: "all", published_at: rand(1..10).days.ago, created_by: principal)
     end
 
 
     # ---- Operations modules -------------------------------------------------
-    titles = [["The Jungle Book", "Rudyard Kipling"], ["A Brief History of Time", "Stephen Hawking"],
-              ["Wings of Fire", "A P J Abdul Kalam"], ["Malgudi Days", "R K Narayan"],
-              ["The Alchemist", "Paulo Coelho"], ["Discovery of India", "Jawaharlal Nehru"],
-              ["Panchatantra", "Vishnu Sharma"], ["Train to Pakistan", "Khushwant Singh"],
-              ["The Guide", "R K Narayan"], ["Gitanjali", "Rabindranath Tagore"]]
+    titles = [ [ "The Jungle Book", "Rudyard Kipling" ], [ "A Brief History of Time", "Stephen Hawking" ],
+              [ "Wings of Fire", "A P J Abdul Kalam" ], [ "Malgudi Days", "R K Narayan" ],
+              [ "The Alchemist", "Paulo Coelho" ], [ "Discovery of India", "Jawaharlal Nehru" ],
+              [ "Panchatantra", "Vishnu Sharma" ], [ "Train to Pakistan", "Khushwant Singh" ],
+              [ "The Guide", "R K Narayan" ], [ "Gitanjali", "Rabindranath Tagore" ] ]
     books = titles.flat_map { |title, author|
       %w[Fiction Science History Reference].first(2).map do |category|
         book = Book.find_or_initialize_by(title: "#{title} (#{category})")
@@ -204,20 +205,20 @@ ActiveRecord::Base.transaction do
       end
     end
 
-    lat, lng = idx.zero? ? [18.5204, 73.8567] : [19.9975, 73.7898]
+    lat, lng = idx.zero? ? [ 18.5204, 73.8567 ] : [ 19.9975, 73.7898 ]
     vehicles = 4.times.map do |n|
       v = Vehicle.find_or_initialize_by(registration_no: "MH#{12 + idx}AB#{1000 + n}")
-      v.update!(model: ["Tata Starbus", "Force Traveller", "Ashok Leyland Lynx", "Eicher Skyline"][n],
-                capacity: [40, 26, 45, 32][n], driver: teachers[n], gps_device_id: "GPS#{2000 + n}",
+      v.update!(model: [ "Tata Starbus", "Force Traveller", "Ashok Leyland Lynx", "Eicher Skyline" ][n],
+                capacity: [ 40, 26, 45, 32 ][n], driver: teachers[n], gps_device_id: "GPS#{2000 + n}",
                 insurance_expires_on: rand(30..300).days.from_now.to_date,
                 fitness_expires_on: rand(60..400).days.from_now.to_date)
       v
     end
 
-    ["North Loop", "Station Road", "Old City", "Lake Side"].each_with_index do |name, n|
+    [ "North Loop", "Station Road", "Old City", "Lake Side" ].each_with_index do |name, n|
       route = TransportRoute.find_or_initialize_by(name:)
       route.update!(vehicle: vehicles[n], start_point: "Campus Gate",
-                    end_point: ["Aundh", "Railway Station", "Fort", "Lakeview"][n], fare: [900, 750, 800, 1000][n])
+                    end_point: [ "Aundh", "Railway Station", "Fort", "Lakeview" ][n], fare: [ 900, 750, 800, 1000 ][n])
       5.times do |i|
         stop = RouteStop.find_or_initialize_by(transport_route: route, name: "#{route.end_point} Stop #{i + 1}")
         stop.update!(pickup_at: "#{7 + (i / 3)}:#{format("%02d", (i * 12) % 60)}",
@@ -249,7 +250,7 @@ ActiveRecord::Base.transaction do
     boys.update!(kind: "boys", warden: teachers[5], capacity: 60, address: "East campus")
     girls = Hostel.find_or_initialize_by(name: "Nightingale House")
     girls.update!(kind: "girls", warden: teachers[6], capacity: 48, address: "West campus")
-    [boys, girls].each do |hostel|
+    [ boys, girls ].each do |hostel|
       (1..6).each do |n|
         room = HostelRoom.find_or_initialize_by(hostel:, number: "#{hostel.kind == "boys" ? "B" : "G"}#{100 + n}")
         room.update!(kind: n <= 2 ? "single" : "shared", capacity: n <= 2 ? 1 : 3, rent: n <= 2 ? 4500 : 2800)
@@ -265,12 +266,12 @@ ActiveRecord::Base.transaction do
       end
     end
 
-    [["Chalk box", "Stationery", "box", 120, 30, 45], ["A4 paper ream", "Stationery", "ream", 60, 20, 260],
-     ["Whiteboard marker", "Stationery", "pcs", 240, 60, 30], ["Floor cleaner", "Housekeeping", "litre", 40, 15, 110],
-     ["Hand wash", "Housekeeping", "litre", 25, 10, 180], ["Tube light", "Electrical", "pcs", 80, 25, 220],
-     ["Ceiling fan", "Electrical", "pcs", 12, 5, 1650], ["Football", "Sports", "pcs", 18, 6, 900],
-     ["Cricket bat", "Sports", "pcs", 9, 4, 1400], ["First-aid kit", "Medical", "pcs", 14, 5, 750],
-     ["Lab beaker", "Laboratory", "pcs", 95, 30, 140], ["Microscope slide", "Laboratory", "box", 22, 10, 320]
+    [ [ "Chalk box", "Stationery", "box", 120, 30, 45 ], [ "A4 paper ream", "Stationery", "ream", 60, 20, 260 ],
+     [ "Whiteboard marker", "Stationery", "pcs", 240, 60, 30 ], [ "Floor cleaner", "Housekeeping", "litre", 40, 15, 110 ],
+     [ "Hand wash", "Housekeeping", "litre", 25, 10, 180 ], [ "Tube light", "Electrical", "pcs", 80, 25, 220 ],
+     [ "Ceiling fan", "Electrical", "pcs", 12, 5, 1650 ], [ "Football", "Sports", "pcs", 18, 6, 900 ],
+     [ "Cricket bat", "Sports", "pcs", 9, 4, 1400 ], [ "First-aid kit", "Medical", "pcs", 14, 5, 750 ],
+     [ "Lab beaker", "Laboratory", "pcs", 95, 30, 140 ], [ "Microscope slide", "Laboratory", "box", 22, 10, 320 ]
     ].each do |name, category, unit, quantity, reorder, cost|
       item = InventoryItem.find_or_initialize_by(name:)
       item.update!(category:, unit:, quantity:, reorder_level: reorder, unit_cost: cost, store: "Main store")
@@ -284,13 +285,13 @@ ActiveRecord::Base.transaction do
       end
     end
 
-    [["Projector", "Electronics", 42_000], ["Desktop PC", "Electronics", 38_000], ["Laser printer", "Electronics", 16_500],
-     ["Science lab bench", "Furniture", 22_000], ["Staff room sofa", "Furniture", 18_000], ["Library shelf", "Furniture", 9_500],
-     ["Water purifier", "Utility", 24_000], ["Generator 15kVA", "Utility", 185_000], ["Smart board", "Electronics", 96_000],
-     ["Sports trampoline", "Sports", 31_000]].each_with_index do |(name, category, cost), n|
+    [ [ "Projector", "Electronics", 42_000 ], [ "Desktop PC", "Electronics", 38_000 ], [ "Laser printer", "Electronics", 16_500 ],
+     [ "Science lab bench", "Furniture", 22_000 ], [ "Staff room sofa", "Furniture", 18_000 ], [ "Library shelf", "Furniture", 9_500 ],
+     [ "Water purifier", "Utility", 24_000 ], [ "Generator 15kVA", "Utility", 185_000 ], [ "Smart board", "Electronics", 96_000 ],
+     [ "Sports trampoline", "Sports", 31_000 ] ].each_with_index do |(name, category, cost), n|
       asset = Asset.find_or_initialize_by(code: "AST-#{format("%03d", n + 1)}")
       asset.update!(name:, category:, cost:, purchased_on: rand(1..5).years.ago.to_date,
-                    location: ["Block A", "Block B", "Lab", "Library", "Ground"].sample,
+                    location: [ "Block A", "Block B", "Lab", "Library", "Ground" ].sample,
                     assigned_to: teachers.sample, condition: %w[good good good fair].sample,
                     status: %w[in_use in_use in_store repair].sample,
                     warranty_expires_on: rand(-200..500).days.from_now.to_date)
@@ -298,17 +299,17 @@ ActiveRecord::Base.transaction do
 
     if Visitor.count.zero?
       12.times do |n|
-        in_at = rand(1..14).days.ago.change(hour: rand(9..16), min: [0, 15, 30, 45].sample)
+        in_at = rand(1..14).days.ago.change(hour: rand(9..16), min: [ 0, 15, 30, 45 ].sample)
         Visitor.create!(name: "#{%w[Suresh Anita Farid Meena Joseph Kiran].sample} #{%w[Kale Shah Khan Pillai D'Souza].sample}",
                         phone: "+9198#{format("%08d", rand(1e8))}",
-                        purpose: ["Admission enquiry", "Meet class teacher", "Fee payment", "Vendor delivery", "Document collection"].sample,
+                        purpose: [ "Admission enquiry", "Meet class teacher", "Fee payment", "Vendor delivery", "Document collection" ].sample,
                         meeting: teachers.sample, pass_no: "V#{1000 + n}", party_size: rand(1..3),
                         in_at:, out_at: n.even? ? in_at + rand(20..90).minutes : nil)
       end
       8.times do
         PhoneLog.create!(caller_name: "#{%w[Parent Vendor Board Inspector].sample} call",
                          phone: "+9197#{format("%08d", rand(1e8))}", direction: %w[incoming outgoing].sample,
-                         purpose: ["Fee query", "Leave intimation", "Supply order", "Circular follow-up"].sample,
+                         purpose: [ "Fee query", "Leave intimation", "Supply order", "Circular follow-up" ].sample,
                          called_at: rand(1..10).days.ago, notes: "Handled at front desk.")
       end
       6.times do |n|
@@ -322,7 +323,7 @@ ActiveRecord::Base.transaction do
     if GatePass.count.zero?
       6.times do |n|
         out_at = rand(1..12).days.ago.change(hour: rand(10..15))
-        GatePass.create!(student: students_for_modules[n * 3], reason: ["Doctor appointment", "Family function", "Unwell", "Sports trial"].sample,
+        GatePass.create!(student: students_for_modules[n * 3], reason: [ "Doctor appointment", "Family function", "Unwell", "Sports trial" ].sample,
                          out_at:, in_at: n.even? ? out_at + rand(1..4).hours : nil,
                          status: n.even? ? "returned" : "approved", approved_by: principal)
       end
@@ -333,27 +334,27 @@ ActiveRecord::Base.transaction do
         HealthRecord.create!(student:, checked_on: rand(5..90).days.ago.to_date,
                              height_cm: rand(110..175) + rand.round(1), weight_kg: rand(22..68) + rand.round(1),
                              blood_pressure: "#{rand(100..125)}/#{rand(65..85)}", pulse: rand(68..96),
-                             vision: %w[6/6 6/9 6/12].sample, allergies: ["None", "Dust", "Peanuts"].sample,
+                             vision: %w[6/6 6/9 6/12].sample, allergies: [ "None", "Dust", "Peanuts" ].sample,
                              notes: "Routine annual check-up.")
       end
     end
 
-    ["Main Gate", "Reception", "Corridor A", "Playground", "Library", "Bus Bay"].each do |place|
+    [ "Main Gate", "Reception", "Corridor A", "Playground", "Library", "Bus Bay" ].each do |place|
       cam = Camera.find_or_initialize_by(name: "#{place} Cam")
       cam.update!(location: place, stream_url: "rtsp://cctv.local/#{place.parameterize}", active: true)
     end
 
-    [["Ramesh Pawar", "Gardener", "morning"], ["Sunita Jadhav", "Housekeeping", "morning"],
-     ["Iqbal Shaikh", "Security", "night"], ["Laxmi Bhosale", "Housekeeping", "afternoon"],
-     ["Ganesh More", "Electrician", "full day"], ["Vijay Kamble", "Security", "morning"],
-     ["Shobha Gaikwad", "Canteen", "full day"], ["Anil Thorat", "Driver helper", "morning"]
+    [ [ "Ramesh Pawar", "Gardener", "morning" ], [ "Sunita Jadhav", "Housekeeping", "morning" ],
+     [ "Iqbal Shaikh", "Security", "night" ], [ "Laxmi Bhosale", "Housekeeping", "afternoon" ],
+     [ "Ganesh More", "Electrician", "full day" ], [ "Vijay Kamble", "Security", "morning" ],
+     [ "Shobha Gaikwad", "Canteen", "full day" ], [ "Anil Thorat", "Driver helper", "morning" ]
     ].each do |name, role, shift|
       worker = CampusWorker.find_or_initialize_by(name:)
       worker.update!(role:, shift:, phone: "+9196#{format("%08d", rand(1e8))}",
                      daily_wage: rand(450..900), joined_on: rand(1..6).years.ago.to_date, status: "active")
     end
 
-    ["Main Gate ADMS", "Staff Room ADMS"].each_with_index do |name, n|
+    [ "Main Gate ADMS", "Staff Room ADMS" ].each_with_index do |name, n|
       dev = BiometricDevice.find_or_initialize_by(serial_number: "ZK#{idx}#{n}00#{rand(100..999)}")
       dev.update!(name:, ip_address: "192.168.#{idx + 1}.#{20 + n}", location: name.sub(" ADMS", ""),
                   last_seen_at: rand(1..90).minutes.ago, active: true)
@@ -368,19 +369,19 @@ ActiveRecord::Base.transaction do
           student_name: "#{first_names.sample} #{last_names.sample}",
           guardian_name: "#{last_names.sample} #{%w[Sr. Ji].sample}",
           phone: "+9195#{format("%08d", rand(1e8))}", email: "enq#{n}@example.com",
-          grade: grades.sample, source: ["Walk-in", "Website", "Referral", "Phone", "Social media"].sample,
+          grade: grades.sample, source: [ "Walk-in", "Website", "Referral", "Phone", "Social media" ].sample,
           status: AdmissionEnquiry::STATUSES.sample, enquired_on: enquired,
           follow_up_on: enquired + rand(3..20), assigned_to: principal,
           notes: "Enquiry logged at the front desk.")
       end
     end
 
-    [["Bonafide Certificate", "bonafide",
-      "This is to certify that {{student_name}} (Admission No {{admission_no}}) is a bonafide student of {{school}}, studying in {{class}}. Issued on {{date}}."],
-     ["Transfer Certificate", "transfer",
-      "{{student_name}}, Admission No {{admission_no}}, of {{class}} is hereby granted a transfer certificate from {{school}} on {{date}}."],
-     ["Character Certificate", "character",
-      "{{student_name}} of {{class}} has borne a good moral character during the period of study at {{school}}. Issued {{date}}."]
+    [ [ "Bonafide Certificate", "bonafide",
+      "This is to certify that {{student_name}} (Admission No {{admission_no}}) is a bonafide student of {{school}}, studying in {{class}}. Issued on {{date}}." ],
+     [ "Transfer Certificate", "transfer",
+      "{{student_name}}, Admission No {{admission_no}}, of {{class}} is hereby granted a transfer certificate from {{school}} on {{date}}." ],
+     [ "Character Certificate", "character",
+      "{{student_name}} of {{class}} has borne a good moral character during the period of study at {{school}}. Issued {{date}}." ]
     ].each do |name, kind, body|
       tpl = CertificateTemplate.find_or_initialize_by(name:)
       tpl.update!(kind:, body:)
@@ -394,8 +395,8 @@ ActiveRecord::Base.transaction do
       end
     end
 
-    [["Student Card — Portrait", "student", "portrait"], ["Staff Card — Portrait", "staff", "portrait"],
-     ["Student Card — Landscape", "student", "landscape"]].each do |name, audience, orientation|
+    [ [ "Student Card — Portrait", "student", "portrait" ], [ "Staff Card — Portrait", "staff", "portrait" ],
+     [ "Student Card — Landscape", "student", "landscape" ] ].each do |name, audience, orientation|
       tpl = IdCardTemplate.find_or_initialize_by(name:)
       tpl.update!(audience:, orientation:, background_color: school.primary_color,
                   fields: %w[photo name admission_no class blood_group phone],
@@ -416,11 +417,11 @@ ActiveRecord::Base.transaction do
     end
 
     if LedgerEntry.count.zero?
-      expenses = [["Electricity bill", "Utilities"], ["Water charges", "Utilities"], ["Housekeeping supplies", "Maintenance"],
-                  ["Bus diesel", "Transport"], ["Lab consumables", "Academics"], ["Printer toner", "Office"],
-                  ["Sports equipment", "Sports"], ["Staff training", "HR"], ["Building repairs", "Maintenance"]]
-      incomes  = [["Fee collection deposit", "Fees"], ["Hostel rent", "Hostel"], ["Transport fare", "Transport"],
-                  ["Donation", "Grants"], ["Book sales", "Library"]]
+      expenses = [ [ "Electricity bill", "Utilities" ], [ "Water charges", "Utilities" ], [ "Housekeeping supplies", "Maintenance" ],
+                  [ "Bus diesel", "Transport" ], [ "Lab consumables", "Academics" ], [ "Printer toner", "Office" ],
+                  [ "Sports equipment", "Sports" ], [ "Staff training", "HR" ], [ "Building repairs", "Maintenance" ] ]
+      incomes  = [ [ "Fee collection deposit", "Fees" ], [ "Hostel rent", "Hostel" ], [ "Transport fare", "Transport" ],
+                  [ "Donation", "Grants" ], [ "Book sales", "Library" ] ]
       40.times do
         income = rand(3).zero?
         description, category = (income ? incomes : expenses).sample

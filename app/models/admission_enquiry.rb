@@ -13,17 +13,17 @@ class AdmissionEnquiry < ApplicationRecord
 
   manage module_key: "admissions", search: %w[student_name guardian_name phone email],
          order: { enquired_on: :desc },
-         columns: [:student_name, :guardian_name, :phone, { name: :grade, type: :belongs_to },
-                   :source, :status, { name: :follow_up_on, type: :date }],
-         fields: [{ name: :student_name, required: true }, :guardian_name,
+         columns: [ :student_name, :guardian_name, :phone, { name: :grade, type: :belongs_to },
+                   :source, :status, { name: :follow_up_on, type: :date } ],
+         fields: [ { name: :student_name, required: true }, :guardian_name,
                   { name: :phone, type: :tel }, { name: :email, type: :email },
                   { name: :grade, type: :belongs_to, options: -> { Grade.ordered } },
-                  { name: :source, type: :select, options: ["Walk-in", "Website", "Referral", "Phone", "Social media"] },
+                  { name: :source, type: :select, options: [ "Walk-in", "Website", "Referral", "Phone", "Social media" ] },
                   { name: :status, type: :select, options: STATUSES },
                   { name: :enquired_on, type: :date, required: true },
                   { name: :follow_up_on, type: :date },
                   { name: :assigned_to, type: :belongs_to, options: -> { User.active.where(kind: %w[admin staff]) } },
-                  { name: :notes, type: :text }]
+                  { name: :notes, type: :text } ]
 
   def name = student_name
 end

@@ -21,5 +21,5 @@ class FeePaymentsController < ApplicationController
 
   private
 
-  def payment_params = params.expect(fee_payment: [:amount, :method, :reference, :paid_at])
+  def payment_params = params.expect(fee_payment: [ :amount, :method, :reference, :paid_at ])
 end

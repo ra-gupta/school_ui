@@ -1,7 +1,7 @@
 class FeeInvoicesController < ApplicationController
-  before_action -> { authorize!("fees.read") },  only: [:index, :show]
-  before_action -> { authorize!("fees.write") }, except: [:index, :show]
-  before_action :set_invoice, only: [:show, :edit, :update, :destroy]
+  before_action -> { authorize!("fees.read") },  only: [ :index, :show ]
+  before_action -> { authorize!("fees.write") }, except: [ :index, :show ]
+  before_action :set_invoice, only: [ :show, :edit, :update, :destroy ]
 
   def index
     scope = FeeInvoice.includes(student: { enrollments: { section: :grade } })
@@ -53,7 +53,7 @@ class FeeInvoicesController < ApplicationController
   def set_invoice = @invoice = FeeInvoice.find(params[:id])
 
   def invoice_params
-    params.expect(fee_invoice: [:student_id, :period, :issue_date, :due_date, :discount, :fine,
-                                fee_invoice_items_attributes: [[:id, :fee_head_id, :description, :amount, :_destroy]]])
+    params.expect(fee_invoice: [ :student_id, :period, :issue_date, :due_date, :discount, :fine,
+                                fee_invoice_items_attributes: [ [ :id, :fee_head_id, :description, :amount, :_destroy ] ] ])
   end
 end

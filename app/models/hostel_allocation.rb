@@ -7,11 +7,11 @@ class HostelAllocation < ApplicationRecord
   validate :room_has_space, on: :create
 
   manage module_key: "hostel", search: [], order: { from_on: :desc },
-         columns: [{ name: :student, type: :belongs_to }, { name: :hostel_room, type: :belongs_to },
-                   :bed_no, { name: :from_on, type: :date }, { name: :to_on, type: :date }],
-         fields: [{ name: :student, type: :belongs_to, required: true, options: -> { Student.active.order(:first_name) } },
+         columns: [ { name: :student, type: :belongs_to }, { name: :hostel_room, type: :belongs_to },
+                   :bed_no, { name: :from_on, type: :date }, { name: :to_on, type: :date } ],
+         fields: [ { name: :student, type: :belongs_to, required: true, options: -> { Student.active.order(:first_name) } },
                   { name: :hostel_room, type: :belongs_to, required: true },
-                  :bed_no, { name: :from_on, type: :date, required: true }, { name: :to_on, type: :date }]
+                  :bed_no, { name: :from_on, type: :date, required: true }, { name: :to_on, type: :date } ]
 
   private
 

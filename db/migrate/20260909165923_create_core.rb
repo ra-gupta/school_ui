@@ -33,7 +33,7 @@ class CreateCore < ActiveRecord::Migration[8.1]
       t.date    :ends_on, null: false
       t.boolean :current, default: false, null: false
       t.timestamps
-      t.index [:school_id, :name], unique: true
+      t.index [ :school_id, :name ], unique: true
     end
 
     create_table :roles do |t|
@@ -42,7 +42,7 @@ class CreateCore < ActiveRecord::Migration[8.1]
       t.string :permissions, array: true, default: [], null: false
       t.boolean :system, default: false, null: false
       t.timestamps
-      t.index [:school_id, :name], unique: true
+      t.index [ :school_id, :name ], unique: true
     end
   end
 end
