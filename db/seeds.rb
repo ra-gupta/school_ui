@@ -11,7 +11,8 @@ ActiveRecord::Base.transaction do
   BUILT_MODULES = %w[homework timetable library transport hostel inventory assets
                      front_office gate_pass health cctv workers biometrics
                      admissions certificates id_cards payroll accounts
-                     communications ptm surveys knowledge_base website engagement chat].freeze
+                     communications ptm surveys knowledge_base website engagement chat
+                     online_exams lesson_plans assessment live_classes study_center digital_eval].freeze
 
   ROLE_PERMISSIONS = {
     "Principal"  => %w[*],
@@ -542,6 +543,130 @@ ActiveRecord::Base.transaction do
           next unless sender
           ChatMessage.create!(conversation: convo, sender:, body:,
                               created_at: (4 - i).hours.ago, read_at: i < 3 ? Time.current : nil)
+        end
+      end
+    end
+
+
+    # ---- Academic modules ---------------------------------------------------
+    if OnlineTest.count.zero?
+      subjects.first(3).each_with_index do |subject, n|
+        grade = grades[n + 2]
+        test = OnlineTest.create!(
+          name: "#{subject.name} unit test — #{grade.name}", academic_year: year, subject:, grade:,
+          staff: teachers[n], duration_minutes: 30, opens_at: (n + 1).days.from_now.change(hour: 10),
+          closes_at: (n + 1).days.from_now.change(hour: 17), pass_marks: 12, status: "published",
+          instructions: "Answer all questions. There is no negative marking.")
+
+        [ [ "Which of these is a prime number?", "mcq", %w[9 15 17 21], "17" ],
+         [ "Water boils at 100 degrees Celsius at sea level.", "true_false", %w[True False], "True" ],
+         [ "Which planet is closest to the Sun?", "mcq", %w[Venus Mercury Mars Earth], "Mercury" ],
+         [ "The largest continent by area is Asia.", "true_false", %w[True False], "True" ],
+         [ "Name the capital of Maharashtra.", "short", [], "Mumbai" ],
+         [ "Which of these is a mammal?", "mcq", %w[Shark Dolphin Octopus Trout], "Dolphin" ]
+        ].each_with_index do |(prompt, kind, options, answer), i|
+          TestQuestion.create!(online_test: test, prompt:, kind:, options:, answer:, marks: 4, position: i)
+        end
+        test.refresh_total_marks!
+
+        section = grade.sections.first
+        section.students.first(8).each_with_index do |student, i|
+          started = rand(1..6).days.ago
+          answers = test.test_questions.to_h do |q|
+            # Most answers right, so the score spread looks like a real cohort.
+            [ q.id.to_s, rand(100) < 72 ? q.answer : (q.options.presence || [ "Delhi" ]).sample ]
+          end
+          attempt = TestAttempt.create!(online_test: test, student:, started_at: started,
+                                        submitted_at: started + rand(12..29).minutes,
+                                        answers:, status: "submitted")
+          attempt.grade! if i < 6
+        end
+      end
+    end
+
+    if LessonPlan.count.zero?
+      Section.includes(:grade).order("grades.level").first(4).each do |section|
+        subjects.first(3).each_with_index do |subject, n|
+          3.times do |w|
+            LessonPlan.create!(
+              section:, subject:, staff: SubjectAssignment.find_by(section:, subject:)&.staff || teachers.sample,
+              week_of: (Date.current.beginning_of_week - (w * 7)),
+              topic: [ "Introduction to #{subject.name}", "#{subject.name} — practice and revision",
+                      "#{subject.name} — assessment week" ][w],
+              objectives: "Students can explain the core idea and apply it to two worked examples.",
+              activities: "Board work, pair discussion, worked examples, exit quiz.",
+              resources: "Textbook chapter #{w + 1}, worksheet, projector.",
+              status: w.zero? ? "planned" : "delivered")
+          end
+        end
+      end
+    end
+
+    if Competency.count.zero?
+      [ [ "Reads with fluency and understanding", "LIT-01", "Literacy" ],
+       [ "Writes clearly for a purpose", "LIT-02", "Literacy" ],
+       [ "Applies number operations accurately", "NUM-01", "Numeracy" ],
+       [ "Interprets data and charts", "NUM-02", "Numeracy" ],
+       [ "Asks scientific questions and predicts", "SCI-01", "Enquiry" ],
+       [ "Works effectively in a team", "SEL-01", "Social" ],
+       [ "Shows self-discipline and responsibility", "SEL-02", "Social" ],
+       [ "Uses digital tools responsibly", "DIG-01", "Digital" ]
+      ].each_with_index do |(name, code, domain), n|
+        competency = Competency.find_or_initialize_by(code:)
+        competency.update!(name:, domain:, grade: grades[n % grades.size], subject: subjects[n % subjects.size],
+                           description: "Assessed continuously through classwork and observation.")
+      end
+
+      Competency.find_each do |competency|
+        students_for_modules.first(10).each do |student|
+          CompetencyScore.create!(competency:, student:, term: "Term 1",
+                                  level: CompetencyScore::LEVELS.sample,
+                                  assessed_by: teachers.sample, assessed_on: rand(10..80).days.ago.to_date,
+                                  remarks: "Observed during classwork.")
+        end
+      end
+    end
+
+    if LiveClass.count.zero?
+      Section.includes(:grade).order("grades.level").first(5).each_with_index do |section, n|
+        subjects.first(2).each_with_index do |subject, i|
+          starts = (n - 2).days.from_now.change(hour: 9 + i, min: 0)
+          LiveClass.create!(
+            title: "#{subject.name} live — #{section.full_name}", section:, subject:,
+            staff: SubjectAssignment.find_by(section:, subject:)&.staff || teachers.sample,
+            starts_at: starts, duration_minutes: 45, platform: %w[meet zoom jitsi].sample,
+            join_url: "https://meet.example.com/#{SecureRandom.alphanumeric(10).downcase}",
+            status: starts > Time.current ? "scheduled" : "ended")
+        end
+      end
+    end
+
+    if StudyMaterial.count.zero?
+      [ [ "Algebra basics — revision notes", "notes" ], [ "Photosynthesis explained", "video" ],
+       [ "Grammar worksheet: tenses", "worksheet" ], [ "Periodic table reference", "link" ],
+       [ "Geometry formulae sheet", "notes" ], [ "Solar system tour", "video" ],
+       [ "Comprehension practice set", "worksheet" ], [ "Map work: rivers of India", "worksheet" ],
+       [ "Fractions drill", "notes" ], [ "Hindi poem recitation", "video" ]
+      ].each_with_index do |(title, kind), n|
+        material = StudyMaterial.find_or_initialize_by(title:)
+        material.update!(kind:, grade: grades[n % grades.size], subject: subjects[n % subjects.size],
+                         staff: teachers.sample, url: "https://files.example.com/#{title.parameterize}",
+                         description: "Shared with the class after the lesson.",
+                         published: true, downloads: rand(5..180))
+      end
+    end
+
+    if Evaluation.count.zero?
+      # ExamSchedule has no school_id of its own — it is reached through the
+      # tenant-scoped exam, so scope it that way rather than by bare limit.
+      ExamSchedule.where(exam_id: Exam.ids).limit(6).each do |schedule|
+        schedule.section.students.first(6).each_with_index do |student, i|
+          done = i < 4
+          Evaluation.create!(exam_schedule: schedule, student:, evaluator: teachers.sample,
+                             marks: done ? rand(25..95) : nil,
+                             status: done ? "completed" : %w[pending in_review].sample,
+                             evaluated_at: done ? rand(1..15).days.ago : nil,
+                             remarks: done ? "Digitally evaluated; handwriting legible." : nil)
         end
       end
     end

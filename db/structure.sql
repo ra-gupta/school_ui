@@ -488,6 +488,81 @@ ALTER SEQUENCE public.chat_messages_id_seq OWNED BY public.chat_messages.id;
 
 
 --
+-- Name: competencies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.competencies (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    grade_id bigint,
+    subject_id bigint,
+    name character varying NOT NULL,
+    code character varying,
+    domain character varying,
+    description text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: competencies_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.competencies_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: competencies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.competencies_id_seq OWNED BY public.competencies.id;
+
+
+--
+-- Name: competency_scores; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.competency_scores (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    competency_id bigint NOT NULL,
+    student_id bigint NOT NULL,
+    assessed_by_id bigint,
+    term character varying NOT NULL,
+    level character varying NOT NULL,
+    remarks text,
+    assessed_on date,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: competency_scores_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.competency_scores_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: competency_scores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.competency_scores_id_seq OWNED BY public.competency_scores.id;
+
+
+--
 -- Name: conversations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -589,6 +664,44 @@ CREATE SEQUENCE public.enrollments_id_seq
 --
 
 ALTER SEQUENCE public.enrollments_id_seq OWNED BY public.enrollments.id;
+
+
+--
+-- Name: evaluations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.evaluations (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    exam_schedule_id bigint NOT NULL,
+    student_id bigint NOT NULL,
+    evaluator_id bigint,
+    marks numeric(6,2),
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    remarks text,
+    evaluated_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: evaluations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.evaluations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: evaluations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.evaluations_id_seq OWNED BY public.evaluations.id;
 
 
 --
@@ -1481,6 +1594,86 @@ ALTER SEQUENCE public.ledger_entries_id_seq OWNED BY public.ledger_entries.id;
 
 
 --
+-- Name: lesson_plans; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lesson_plans (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    section_id bigint,
+    subject_id bigint,
+    staff_id bigint,
+    week_of date NOT NULL,
+    topic character varying NOT NULL,
+    objectives text,
+    activities text,
+    resources text,
+    status character varying DEFAULT 'planned'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: lesson_plans_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lesson_plans_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lesson_plans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lesson_plans_id_seq OWNED BY public.lesson_plans.id;
+
+
+--
+-- Name: live_classes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.live_classes (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    section_id bigint,
+    subject_id bigint,
+    staff_id bigint,
+    title character varying NOT NULL,
+    starts_at timestamp(6) without time zone NOT NULL,
+    duration_minutes integer DEFAULT 45 NOT NULL,
+    platform character varying DEFAULT 'meet'::character varying NOT NULL,
+    join_url character varying,
+    status character varying DEFAULT 'scheduled'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: live_classes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.live_classes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: live_classes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.live_classes_id_seq OWNED BY public.live_classes.id;
+
+
+--
 -- Name: message_logs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1594,6 +1787,50 @@ CREATE SEQUENCE public.notices_id_seq
 --
 
 ALTER SEQUENCE public.notices_id_seq OWNED BY public.notices.id;
+
+
+--
+-- Name: online_tests; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.online_tests (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    academic_year_id bigint,
+    subject_id bigint,
+    grade_id bigint,
+    staff_id bigint,
+    name character varying NOT NULL,
+    instructions text,
+    duration_minutes integer DEFAULT 30 NOT NULL,
+    opens_at timestamp(6) without time zone,
+    closes_at timestamp(6) without time zone,
+    total_marks numeric(6,2) DEFAULT 0.0 NOT NULL,
+    pass_marks numeric(6,2) DEFAULT 0.0 NOT NULL,
+    shuffle_questions boolean DEFAULT true NOT NULL,
+    status character varying DEFAULT 'draft'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: online_tests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.online_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: online_tests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.online_tests_id_seq OWNED BY public.online_tests.id;
 
 
 --
@@ -2155,6 +2392,46 @@ ALTER SEQUENCE public.students_id_seq OWNED BY public.students.id;
 
 
 --
+-- Name: study_materials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.study_materials (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    grade_id bigint,
+    subject_id bigint,
+    staff_id bigint,
+    title character varying NOT NULL,
+    kind character varying DEFAULT 'notes'::character varying NOT NULL,
+    url character varying,
+    description text,
+    published boolean DEFAULT true NOT NULL,
+    downloads integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: study_materials_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.study_materials_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.study_materials_id_seq OWNED BY public.study_materials.id;
+
+
+--
 -- Name: subject_assignments; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2331,6 +2608,82 @@ CREATE SEQUENCE public.surveys_id_seq
 --
 
 ALTER SEQUENCE public.surveys_id_seq OWNED BY public.surveys.id;
+
+
+--
+-- Name: test_attempts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.test_attempts (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    online_test_id bigint NOT NULL,
+    student_id bigint NOT NULL,
+    started_at timestamp(6) without time zone,
+    submitted_at timestamp(6) without time zone,
+    score numeric(6,2),
+    status character varying DEFAULT 'in_progress'::character varying NOT NULL,
+    answers jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: test_attempts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.test_attempts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_attempts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.test_attempts_id_seq OWNED BY public.test_attempts.id;
+
+
+--
+-- Name: test_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.test_questions (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    online_test_id bigint NOT NULL,
+    prompt text NOT NULL,
+    kind character varying DEFAULT 'mcq'::character varying NOT NULL,
+    options character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    answer character varying,
+    marks numeric(6,2) DEFAULT 1.0 NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: test_questions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.test_questions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_questions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.test_questions_id_seq OWNED BY public.test_questions.id;
 
 
 --
@@ -2719,6 +3072,20 @@ ALTER TABLE ONLY public.chat_messages ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: competencies id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competencies ALTER COLUMN id SET DEFAULT nextval('public.competencies_id_seq'::regclass);
+
+
+--
+-- Name: competency_scores id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores ALTER COLUMN id SET DEFAULT nextval('public.competency_scores_id_seq'::regclass);
+
+
+--
 -- Name: conversations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2737,6 +3104,13 @@ ALTER TABLE ONLY public.departments ALTER COLUMN id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.enrollments ALTER COLUMN id SET DEFAULT nextval('public.enrollments_id_seq'::regclass);
+
+
+--
+-- Name: evaluations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations ALTER COLUMN id SET DEFAULT nextval('public.evaluations_id_seq'::regclass);
 
 
 --
@@ -2908,6 +3282,20 @@ ALTER TABLE ONLY public.ledger_entries ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: lesson_plans id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans ALTER COLUMN id SET DEFAULT nextval('public.lesson_plans_id_seq'::regclass);
+
+
+--
+-- Name: live_classes id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes ALTER COLUMN id SET DEFAULT nextval('public.live_classes_id_seq'::regclass);
+
+
+--
 -- Name: message_logs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2926,6 +3314,13 @@ ALTER TABLE ONLY public.message_templates ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.notices ALTER COLUMN id SET DEFAULT nextval('public.notices_id_seq'::regclass);
+
+
+--
+-- Name: online_tests id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests ALTER COLUMN id SET DEFAULT nextval('public.online_tests_id_seq'::regclass);
 
 
 --
@@ -3027,6 +3422,13 @@ ALTER TABLE ONLY public.students ALTER COLUMN id SET DEFAULT nextval('public.stu
 
 
 --
+-- Name: study_materials id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials ALTER COLUMN id SET DEFAULT nextval('public.study_materials_id_seq'::regclass);
+
+
+--
 -- Name: subject_assignments id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3059,6 +3461,20 @@ ALTER TABLE ONLY public.survey_responses ALTER COLUMN id SET DEFAULT nextval('pu
 --
 
 ALTER TABLE ONLY public.surveys ALTER COLUMN id SET DEFAULT nextval('public.surveys_id_seq'::regclass);
+
+
+--
+-- Name: test_attempts id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_attempts ALTER COLUMN id SET DEFAULT nextval('public.test_attempts_id_seq'::regclass);
+
+
+--
+-- Name: test_questions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_questions ALTER COLUMN id SET DEFAULT nextval('public.test_questions_id_seq'::regclass);
 
 
 --
@@ -3222,6 +3638,22 @@ ALTER TABLE ONLY public.chat_messages
 
 
 --
+-- Name: competencies competencies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competencies
+    ADD CONSTRAINT competencies_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: competency_scores competency_scores_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores
+    ADD CONSTRAINT competency_scores_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: conversations conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3243,6 +3675,14 @@ ALTER TABLE ONLY public.departments
 
 ALTER TABLE ONLY public.enrollments
     ADD CONSTRAINT enrollments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: evaluations evaluations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT evaluations_pkey PRIMARY KEY (id);
 
 
 --
@@ -3438,6 +3878,22 @@ ALTER TABLE ONLY public.ledger_entries
 
 
 --
+-- Name: lesson_plans lesson_plans_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans
+    ADD CONSTRAINT lesson_plans_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: live_classes live_classes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes
+    ADD CONSTRAINT live_classes_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: message_logs message_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3459,6 +3915,14 @@ ALTER TABLE ONLY public.message_templates
 
 ALTER TABLE ONLY public.notices
     ADD CONSTRAINT notices_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: online_tests online_tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT online_tests_pkey PRIMARY KEY (id);
 
 
 --
@@ -3582,6 +4046,14 @@ ALTER TABLE ONLY public.students
 
 
 --
+-- Name: study_materials study_materials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials
+    ADD CONSTRAINT study_materials_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: subject_assignments subject_assignments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3619,6 +4091,22 @@ ALTER TABLE ONLY public.survey_responses
 
 ALTER TABLE ONLY public.surveys
     ADD CONSTRAINT surveys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_attempts test_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_attempts
+    ADD CONSTRAINT test_attempts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_questions test_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_questions
+    ADD CONSTRAINT test_questions_pkey PRIMARY KEY (id);
 
 
 --
@@ -3690,6 +4178,20 @@ ALTER TABLE ONLY public.web_pages
 --
 
 CREATE UNIQUE INDEX idx_attendance_unique ON public.attendances USING btree (attendable_type, attendable_id, on_date);
+
+
+--
+-- Name: idx_competency_score_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_competency_score_unique ON public.competency_scores USING btree (competency_id, student_id, term);
+
+
+--
+-- Name: idx_evaluation_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_evaluation_unique ON public.evaluations USING btree (exam_schedule_id, student_id);
 
 
 --
@@ -3980,6 +4482,62 @@ CREATE INDEX index_chat_messages_on_sender_id ON public.chat_messages USING btre
 
 
 --
+-- Name: index_competencies_on_grade_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competencies_on_grade_id ON public.competencies USING btree (grade_id);
+
+
+--
+-- Name: index_competencies_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competencies_on_school_id ON public.competencies USING btree (school_id);
+
+
+--
+-- Name: index_competencies_on_school_id_and_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competencies_on_school_id_and_code ON public.competencies USING btree (school_id, code);
+
+
+--
+-- Name: index_competencies_on_subject_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competencies_on_subject_id ON public.competencies USING btree (subject_id);
+
+
+--
+-- Name: index_competency_scores_on_assessed_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competency_scores_on_assessed_by_id ON public.competency_scores USING btree (assessed_by_id);
+
+
+--
+-- Name: index_competency_scores_on_competency_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competency_scores_on_competency_id ON public.competency_scores USING btree (competency_id);
+
+
+--
+-- Name: index_competency_scores_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competency_scores_on_school_id ON public.competency_scores USING btree (school_id);
+
+
+--
+-- Name: index_competency_scores_on_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_competency_scores_on_student_id ON public.competency_scores USING btree (student_id);
+
+
+--
 -- Name: index_conversations_on_guardian_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4061,6 +4619,34 @@ CREATE INDEX index_enrollments_on_section_id ON public.enrollments USING btree (
 --
 
 CREATE INDEX index_enrollments_on_student_id ON public.enrollments USING btree (student_id);
+
+
+--
+-- Name: index_evaluations_on_evaluator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_evaluations_on_evaluator_id ON public.evaluations USING btree (evaluator_id);
+
+
+--
+-- Name: index_evaluations_on_exam_schedule_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_evaluations_on_exam_schedule_id ON public.evaluations USING btree (exam_schedule_id);
+
+
+--
+-- Name: index_evaluations_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_evaluations_on_school_id ON public.evaluations USING btree (school_id);
+
+
+--
+-- Name: index_evaluations_on_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_evaluations_on_student_id ON public.evaluations USING btree (student_id);
 
 
 --
@@ -4554,6 +5140,76 @@ CREATE INDEX index_ledger_entries_on_school_id_and_on_date ON public.ledger_entr
 
 
 --
+-- Name: index_lesson_plans_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_lesson_plans_on_school_id ON public.lesson_plans USING btree (school_id);
+
+
+--
+-- Name: index_lesson_plans_on_school_id_and_week_of; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_lesson_plans_on_school_id_and_week_of ON public.lesson_plans USING btree (school_id, week_of);
+
+
+--
+-- Name: index_lesson_plans_on_section_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_lesson_plans_on_section_id ON public.lesson_plans USING btree (section_id);
+
+
+--
+-- Name: index_lesson_plans_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_lesson_plans_on_staff_id ON public.lesson_plans USING btree (staff_id);
+
+
+--
+-- Name: index_lesson_plans_on_subject_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_lesson_plans_on_subject_id ON public.lesson_plans USING btree (subject_id);
+
+
+--
+-- Name: index_live_classes_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_live_classes_on_school_id ON public.live_classes USING btree (school_id);
+
+
+--
+-- Name: index_live_classes_on_school_id_and_starts_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_live_classes_on_school_id_and_starts_at ON public.live_classes USING btree (school_id, starts_at);
+
+
+--
+-- Name: index_live_classes_on_section_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_live_classes_on_section_id ON public.live_classes USING btree (section_id);
+
+
+--
+-- Name: index_live_classes_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_live_classes_on_staff_id ON public.live_classes USING btree (staff_id);
+
+
+--
+-- Name: index_live_classes_on_subject_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_live_classes_on_subject_id ON public.live_classes USING btree (subject_id);
+
+
+--
 -- Name: index_message_logs_on_message_template_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4614,6 +5270,48 @@ CREATE INDEX index_notices_on_school_id_and_published_at ON public.notices USING
 --
 
 CREATE INDEX index_notices_on_section_id ON public.notices USING btree (section_id);
+
+
+--
+-- Name: index_online_tests_on_academic_year_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_academic_year_id ON public.online_tests USING btree (academic_year_id);
+
+
+--
+-- Name: index_online_tests_on_grade_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_grade_id ON public.online_tests USING btree (grade_id);
+
+
+--
+-- Name: index_online_tests_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_school_id ON public.online_tests USING btree (school_id);
+
+
+--
+-- Name: index_online_tests_on_school_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_school_id_and_status ON public.online_tests USING btree (school_id, status);
+
+
+--
+-- Name: index_online_tests_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_staff_id ON public.online_tests USING btree (staff_id);
+
+
+--
+-- Name: index_online_tests_on_subject_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_online_tests_on_subject_id ON public.online_tests USING btree (subject_id);
 
 
 --
@@ -4883,6 +5581,41 @@ CREATE INDEX index_students_on_user_id ON public.students USING btree (user_id);
 
 
 --
+-- Name: index_study_materials_on_grade_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_study_materials_on_grade_id ON public.study_materials USING btree (grade_id);
+
+
+--
+-- Name: index_study_materials_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_study_materials_on_school_id ON public.study_materials USING btree (school_id);
+
+
+--
+-- Name: index_study_materials_on_school_id_and_kind; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_study_materials_on_school_id_and_kind ON public.study_materials USING btree (school_id, kind);
+
+
+--
+-- Name: index_study_materials_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_study_materials_on_staff_id ON public.study_materials USING btree (staff_id);
+
+
+--
+-- Name: index_study_materials_on_subject_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_study_materials_on_subject_id ON public.study_materials USING btree (subject_id);
+
+
+--
 -- Name: index_subject_assignments_on_section_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4978,6 +5711,55 @@ CREATE INDEX index_survey_responses_on_user_id ON public.survey_responses USING 
 --
 
 CREATE INDEX index_surveys_on_school_id ON public.surveys USING btree (school_id);
+
+
+--
+-- Name: index_test_attempts_on_online_test_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_attempts_on_online_test_id ON public.test_attempts USING btree (online_test_id);
+
+
+--
+-- Name: index_test_attempts_on_online_test_id_and_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_test_attempts_on_online_test_id_and_student_id ON public.test_attempts USING btree (online_test_id, student_id);
+
+
+--
+-- Name: index_test_attempts_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_attempts_on_school_id ON public.test_attempts USING btree (school_id);
+
+
+--
+-- Name: index_test_attempts_on_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_attempts_on_student_id ON public.test_attempts USING btree (student_id);
+
+
+--
+-- Name: index_test_questions_on_online_test_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_questions_on_online_test_id ON public.test_questions USING btree (online_test_id);
+
+
+--
+-- Name: index_test_questions_on_online_test_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_questions_on_online_test_id_and_position ON public.test_questions USING btree (online_test_id, "position");
+
+
+--
+-- Name: index_test_questions_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_test_questions_on_school_id ON public.test_questions USING btree (school_id);
 
 
 --
@@ -5156,6 +5938,14 @@ CREATE UNIQUE INDEX index_web_pages_on_school_id_and_slug ON public.web_pages US
 
 
 --
+-- Name: lesson_plans fk_rails_012692f4cb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans
+    ADD CONSTRAINT fk_rails_012692f4cb FOREIGN KEY (section_id) REFERENCES public.sections(id);
+
+
+--
 -- Name: timetable_slots fk_rails_03bbd967c8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5177,6 +5967,14 @@ ALTER TABLE ONLY public.message_logs
 
 ALTER TABLE ONLY public.timetable_slots
     ADD CONSTRAINT fk_rails_055acf3db1 FOREIGN KEY (academic_year_id) REFERENCES public.academic_years(id);
+
+
+--
+-- Name: evaluations fk_rails_0569adefcd; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT fk_rails_0569adefcd FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5228,6 +6026,22 @@ ALTER TABLE ONLY public.fee_invoice_items
 
 
 --
+-- Name: evaluations fk_rails_112c4a47ec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT fk_rails_112c4a47ec FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
+-- Name: lesson_plans fk_rails_1166793e0a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans
+    ADD CONSTRAINT fk_rails_1166793e0a FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
+
+
+--
 -- Name: fee_structures fk_rails_12a3fc0c37; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5260,11 +6074,35 @@ ALTER TABLE ONLY public.ptm_meetings
 
 
 --
+-- Name: competency_scores fk_rails_17e8790c95; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores
+    ADD CONSTRAINT fk_rails_17e8790c95 FOREIGN KEY (assessed_by_id) REFERENCES public.staffs(id);
+
+
+--
+-- Name: study_materials fk_rails_1867868c7c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials
+    ADD CONSTRAINT fk_rails_1867868c7c FOREIGN KEY (grade_id) REFERENCES public.grades(id);
+
+
+--
 -- Name: homework_submissions fk_rails_1954c411ec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.homework_submissions
     ADD CONSTRAINT fk_rails_1954c411ec FOREIGN KEY (homework_id) REFERENCES public.homeworks(id);
+
+
+--
+-- Name: online_tests fk_rails_19b78aae51; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT fk_rails_19b78aae51 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5276,11 +6114,27 @@ ALTER TABLE ONLY public.hostel_rooms
 
 
 --
+-- Name: test_attempts fk_rails_1ae7c4a1f3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_attempts
+    ADD CONSTRAINT fk_rails_1ae7c4a1f3 FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
 -- Name: ledger_entries fk_rails_1d53b50b68; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ledger_entries
     ADD CONSTRAINT fk_rails_1d53b50b68 FOREIGN KEY (recorded_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: evaluations fk_rails_1dee3a6b85; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT fk_rails_1dee3a6b85 FOREIGN KEY (exam_schedule_id) REFERENCES public.exam_schedules(id);
 
 
 --
@@ -5308,11 +6162,27 @@ ALTER TABLE ONLY public.guardians
 
 
 --
+-- Name: study_materials fk_rails_280709668c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials
+    ADD CONSTRAINT fk_rails_280709668c FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
+
+
+--
 -- Name: issued_certificates fk_rails_2811a27a1f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.issued_certificates
     ADD CONSTRAINT fk_rails_2811a27a1f FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: live_classes fk_rails_28e661aec8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes
+    ADD CONSTRAINT fk_rails_28e661aec8 FOREIGN KEY (section_id) REFERENCES public.sections(id);
 
 
 --
@@ -5337,6 +6207,14 @@ ALTER TABLE ONLY public.notices
 
 ALTER TABLE ONLY public.attendances
     ADD CONSTRAINT fk_rails_2d8c655a59 FOREIGN KEY (academic_year_id) REFERENCES public.academic_years(id);
+
+
+--
+-- Name: test_questions fk_rails_2e79f3541d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_questions
+    ADD CONSTRAINT fk_rails_2e79f3541d FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5508,6 +6386,14 @@ ALTER TABLE ONLY public.fee_invoices
 
 
 --
+-- Name: competency_scores fk_rails_4c4e11e6f0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores
+    ADD CONSTRAINT fk_rails_4c4e11e6f0 FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
 -- Name: hostel_allocations fk_rails_4cb5d1eef5; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5636,6 +6522,14 @@ ALTER TABLE ONLY public.conversations
 
 
 --
+-- Name: test_attempts fk_rails_656242f161; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_attempts
+    ADD CONSTRAINT fk_rails_656242f161 FOREIGN KEY (online_test_id) REFERENCES public.online_tests(id);
+
+
+--
 -- Name: admission_enquiries fk_rails_6573417436; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5660,6 +6554,22 @@ ALTER TABLE ONLY public.book_issues
 
 
 --
+-- Name: competencies fk_rails_6979bb553e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competencies
+    ADD CONSTRAINT fk_rails_6979bb553e FOREIGN KEY (grade_id) REFERENCES public.grades(id);
+
+
+--
+-- Name: online_tests fk_rails_6a8066ca8d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT fk_rails_6a8066ca8d FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
+
+
+--
 -- Name: phone_logs fk_rails_6a9a6ee9c3; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5673,6 +6583,14 @@ ALTER TABLE ONLY public.phone_logs
 
 ALTER TABLE ONLY public.route_stops
     ADD CONSTRAINT fk_rails_6b8a6fb9f5 FOREIGN KEY (transport_route_id) REFERENCES public.transport_routes(id);
+
+
+--
+-- Name: online_tests fk_rails_6bb054fb91; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT fk_rails_6bb054fb91 FOREIGN KEY (academic_year_id) REFERENCES public.academic_years(id);
 
 
 --
@@ -5772,6 +6690,14 @@ ALTER TABLE ONLY public.hostel_rooms
 
 
 --
+-- Name: live_classes fk_rails_783a8d0d5f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes
+    ADD CONSTRAINT fk_rails_783a8d0d5f FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
 -- Name: homeworks fk_rails_7858a4052d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5780,11 +6706,35 @@ ALTER TABLE ONLY public.homeworks
 
 
 --
+-- Name: lesson_plans fk_rails_79e0d78a8c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans
+    ADD CONSTRAINT fk_rails_79e0d78a8c FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: survey_responses fk_rails_7a71a34959; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.survey_responses
     ADD CONSTRAINT fk_rails_7a71a34959 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: live_classes fk_rails_7b28767f52; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes
+    ADD CONSTRAINT fk_rails_7b28767f52 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: competencies fk_rails_7be14e9c53; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competencies
+    ADD CONSTRAINT fk_rails_7be14e9c53 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5801,6 +6751,14 @@ ALTER TABLE ONLY public.gate_passes
 
 ALTER TABLE ONLY public.notices
     ADD CONSTRAINT fk_rails_7e3081eff2 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: study_materials fk_rails_7fa1a0d11f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials
+    ADD CONSTRAINT fk_rails_7fa1a0d11f FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
 
 
 --
@@ -5889,6 +6847,22 @@ ALTER TABLE ONLY public.timetable_slots
 
 ALTER TABLE ONLY public.subject_assignments
     ADD CONSTRAINT fk_rails_94e641febb FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
+-- Name: online_tests fk_rails_9582209843; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT fk_rails_9582209843 FOREIGN KEY (grade_id) REFERENCES public.grades(id);
+
+
+--
+-- Name: competencies fk_rails_97d95ad371; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competencies
+    ADD CONSTRAINT fk_rails_97d95ad371 FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
 
 
 --
@@ -5988,6 +6962,14 @@ ALTER TABLE ONLY public.conversations
 
 
 --
+-- Name: online_tests fk_rails_b6ad68c670; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.online_tests
+    ADD CONSTRAINT fk_rails_b6ad68c670 FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
 -- Name: payslips fk_rails_b77d37263d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6060,6 +7042,14 @@ ALTER TABLE ONLY public.web_pages
 
 
 --
+-- Name: live_classes fk_rails_c32149e4bb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.live_classes
+    ADD CONSTRAINT fk_rails_c32149e4bb FOREIGN KEY (subject_id) REFERENCES public.subjects(id);
+
+
+--
 -- Name: transport_assignments fk_rails_c3d3de1b6b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6124,6 +7114,14 @@ ALTER TABLE ONLY public.certificate_templates
 
 
 --
+-- Name: competency_scores fk_rails_d0d9466b3d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores
+    ADD CONSTRAINT fk_rails_d0d9466b3d FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: attendances fk_rails_d1a9c7df43; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6156,11 +7154,35 @@ ALTER TABLE ONLY public.fee_invoice_items
 
 
 --
+-- Name: competency_scores fk_rails_d7797402f8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.competency_scores
+    ADD CONSTRAINT fk_rails_d7797402f8 FOREIGN KEY (competency_id) REFERENCES public.competencies(id);
+
+
+--
+-- Name: study_materials fk_rails_d7ac52445a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.study_materials
+    ADD CONSTRAINT fk_rails_d7ac52445a FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: message_templates fk_rails_d7bfadd7b6; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.message_templates
     ADD CONSTRAINT fk_rails_d7bfadd7b6 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: lesson_plans fk_rails_d8b0823155; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lesson_plans
+    ADD CONSTRAINT fk_rails_d8b0823155 FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
 
 
 --
@@ -6209,6 +7231,14 @@ ALTER TABLE ONLY public.attendances
 
 ALTER TABLE ONLY public.timetable_slots
     ADD CONSTRAINT fk_rails_df541ffe75 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: evaluations fk_rails_dfcb5d1138; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT fk_rails_dfcb5d1138 FOREIGN KEY (evaluator_id) REFERENCES public.staffs(id);
 
 
 --
@@ -6292,6 +7322,14 @@ ALTER TABLE ONLY public.kb_articles
 
 
 --
+-- Name: test_attempts fk_rails_ec8f27534c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_attempts
+    ADD CONSTRAINT fk_rails_ec8f27534c FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: enrollments fk_rails_f01c555e06; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6364,12 +7402,21 @@ ALTER TABLE ONLY public.book_issues
 
 
 --
+-- Name: test_questions fk_rails_fa82487007; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.test_questions
+    ADD CONSTRAINT fk_rails_fa82487007 FOREIGN KEY (online_test_id) REFERENCES public.online_tests(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260910130000'),
 ('20260910120000'),
 ('20260910110000'),
 ('20260910100000'),

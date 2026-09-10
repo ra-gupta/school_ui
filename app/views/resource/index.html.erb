@@ -31,7 +31,7 @@
     <% filters.each do |field| %>
       <%= select_tag field.key,
             options_from_collection_for_select(field_collection(model.new, field), :id, ->(o) { field_label_for(o) }, params[field.key]),
-            include_blank: "All #{field.label.downcase.pluralize}", class: "rounded-lg border-slate-300 text-sm shadow-sm" %>
+            include_blank: "Any #{field.label.downcase}", class: "rounded-lg border-slate-300 text-sm shadow-sm" %>
     <% end %>
     <%= submit_tag "Filter", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300", name: nil %>
   <% end %>
