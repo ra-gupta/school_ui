@@ -1,0 +1,79 @@
+<% content_for :title, "Reports" %>
+<%= render "shared/header", title: "Reports & Export" %>
+
+<%= form_with url: reports_path, method: :get, class: "mb-6 flex flex-wrap items-end gap-2" do %>
+  <label class="block"><span class="text-xs font-medium text-slate-500">From</span>
+    <%= date_field_tag :from, @from, class: "mt-1 rounded-lg border-slate-300 text-sm shadow-sm" %></label>
+  <label class="block"><span class="text-xs font-medium text-slate-500">To</span>
+    <%= date_field_tag :to, @to, class: "mt-1 rounded-lg border-slate-300 text-sm shadow-sm" %></label>
+  <%= submit_tag "Apply", class: "rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300", name: nil %>
+  <%= link_to "Export collections (CSV)", reports_path(format: :csv, from: @from, to: @to),
+        class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800" %>
+<% end %>
+
+<div class="grid gap-4 sm:grid-cols-3">
+  <%= render "dashboard/stat", label: "Collected in range", value: rupees_short(@collection_by_month.values.sum) %>
+  <%= render "dashboard/stat", label: "Income (ledger)", value: rupees_short(@ledger["income"].to_f) %>
+  <%= render "dashboard/stat", label: "Expense (ledger)", value: rupees_short(@ledger["expense"].to_f) %>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-sm font-semibold text-slate-900">Fee collection by month</h2>
+    <% peak = [@collection_by_month.values.max.to_f, 1].max %>
+    <ul class="space-y-2 text-sm">
+      <% @collection_by_month.sort.each do |month, amount| %>
+        <li>
+          <div class="flex justify-between"><span class="text-slate-600"><%= Date.parse("#{month}-01").strftime("%B %Y") %></span>
+            <span class="font-medium tabular-nums"><%= rupees(amount) %></span></div>
+          <div class="mt-1 h-2 rounded-full bg-slate-100">
+            <div class="h-2 rounded-full" style="width: <%= (amount / peak * 100).round(1) %>%; background: var(--series-1)"></div>
+          </div>
+        </li>
+      <% end %>
+      <% if @collection_by_month.empty? %><li class="text-slate-400">Nothing collected in this range.</li><% end %>
+    </ul>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-sm font-semibold text-slate-900">Attendance in range</h2>
+    <% total = [@attendance_by_status.values.sum, 1].max %>
+    <ul class="space-y-2 text-sm">
+      <% [["present", "var(--st-good)"], ["late", "var(--st-warning)"],
+          ["absent", "var(--st-critical)"], ["leave", "var(--st-serious)"]].each do |status, colour| %>
+        <li class="flex items-center justify-between gap-3">
+          <span class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-sm" style="background: <%= colour %>"></span>
+            <span class="text-slate-600"><%= status.humanize %></span>
+          </span>
+          <span class="tabular-nums"><%= number_with_delimiter(@attendance_by_status[status].to_i) %>
+            <span class="text-slate-400">(<%= (@attendance_by_status[status].to_i / total.to_f * 100).round %>%)</span></span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-sm font-semibold text-slate-900">Strength by class</h2>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @strength_by_grade.each do |grade, count| %>
+          <tr><td class="py-2"><%= grade %></td><td class="py-2 text-right font-medium tabular-nums"><%= count %></td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-sm font-semibold text-slate-900">Outstanding dues by class</h2>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100">
+        <% @dues_by_grade.sort_by { -it.last }.each do |grade, amount| %>
+          <tr><td class="py-2"><%= grade %></td>
+              <td class="py-2 text-right font-medium tabular-nums <%= "text-red-600" if amount.to_f.positive? %>"><%= rupees(amount) %></td></tr>
+        <% end %>
+        <% if @dues_by_grade.empty? %><tr><td class="py-6 text-center text-slate-400">Nothing outstanding.</td></tr><% end %>
+      </tbody>
+    </table>
+  </section>
+</div>

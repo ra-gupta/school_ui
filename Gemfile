@@ -60,5 +60,8 @@ group :test do
   gem "selenium-webdriver"
 end
 
+# Ruby 3.4 dropped csv from the default gems; the reports export needs it.
+gem "csv"
+
 # json 3.x breaks ActiveSupport::JSON.decode (parse arity)
 gem "json", "~> 2.7"

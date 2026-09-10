@@ -12,7 +12,8 @@ ActiveRecord::Base.transaction do
                      front_office gate_pass health cctv workers biometrics
                      admissions certificates id_cards payroll accounts
                      communications ptm surveys knowledge_base website engagement chat
-                     online_exams lesson_plans assessment live_classes study_center digital_eval].freeze
+                     online_exams lesson_plans assessment live_classes study_center digital_eval
+                     compliance support backups storage reports].freeze
 
   ROLE_PERMISSIONS = {
     "Principal"  => %w[*],
@@ -668,6 +669,68 @@ ActiveRecord::Base.transaction do
                              evaluated_at: done ? rand(1..15).days.ago : nil,
                              remarks: done ? "Digitally evaluated; handwriting legible." : nil)
         end
+      end
+    end
+
+
+    # ---- System modules -----------------------------------------------------
+    if ComplianceDocument.count.zero?
+      [ [ "Fire safety certificate", "Safety", "Fire Department", 40 ],
+       [ "Building occupancy certificate", "Statutory", "Municipal Corporation", 900 ],
+       [ "Board affiliation", "Academic", "CBSE", 500 ],
+       [ "Water quality test report", "Health", "State Lab", -20 ],
+       [ "Lift maintenance certificate", "Safety", "Licensed Contractor", 15 ],
+       [ "Kitchen hygiene licence", "Health", "FSSAI", 200 ],
+       [ "Transport fitness clearance", "Transport", "RTO", 120 ]
+      ].each do |title, category, authority, days|
+        doc = ComplianceDocument.find_or_initialize_by(title:)
+        doc.update!(category:, authority:, reference_no: "REG/#{rand(1000..9999)}",
+                    owner: teachers.sample, issued_on: (days - 365).days.from_now.to_date,
+                    expires_on: days.days.from_now.to_date,
+                    notes: "Filed with the administrative office.")
+      end
+    end
+
+    if SupportTicket.count.zero?
+      [ [ "Projector in Lab 2 not switching on", "Hardware", "high" ],
+       [ "Fee receipt shows wrong class", "Data", "normal" ],
+       [ "Parent app login not working for one guardian", "Access", "urgent" ],
+       [ "Request: add a new fee head for excursions", "Feature", "low" ],
+       [ "Bus route timing needs adjusting", "Transport", "normal" ],
+       [ "Report card PDF is missing grades", "Reports", "high" ]
+      ].each_with_index do |(subject, category, priority), n|
+        SupportTicket.create!(subject:, category:, priority:,
+                              body: "Reported by the front office. Please look into it.",
+                              raised_by: principal, assigned_to: n.even? ? principal : nil,
+                              status: %w[open in_progress waiting resolved closed][n % 5],
+                              created_at: rand(1..30).days.ago)
+      end
+    end
+
+    if BackupRun.count.zero?
+      14.downto(1) do |days|
+        started = days.days.ago.change(hour: 2, min: 0)
+        failed = days == 6
+        BackupRun.create!(destination: %w[r2 b2 local].sample, kind: "full", started_at: started,
+                          finished_at: failed ? nil : started + rand(3..11).minutes,
+                          size_bytes: failed ? nil : rand(180..420) * 1_048_576,
+                          status: failed ? "failed" : "success",
+                          error: failed ? "Remote endpoint refused the connection" : nil)
+      end
+    end
+
+    if StoredFile.count.zero?
+      [ [ "Academic calendar 2026-27", "Circulars", "public" ],
+       [ "Staff handbook", "Policies", "staff" ],
+       [ "Fee structure notice", "Circulars", "parents" ],
+       [ "Exam datesheet", "Examinations", "students" ],
+       [ "Emergency contact list", "Policies", "staff" ]
+      ].each do |title, folder, visibility|
+        file = StoredFile.new(title:, folder:, visibility:, uploaded_by: principal,
+                              description: "Uploaded by the administrative office.")
+        file.file.attach(io: StringIO.new("#{title}\n\nPlaceholder document for #{school.name}.\n"),
+                         filename: "#{title.parameterize}.txt", content_type: "text/plain")
+        file.save!
       end
     end
 
