@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@source "../../../app/views";
+@source "../../../app/helpers";
+@source "../../../app/javascript";
+
+/* Inter is @font-face'd in app/assets/stylesheets/application.css (Propshaft
+   resolves the woff2 URLs there); this just points Tailwind's stack at it. */
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
