@@ -9,6 +9,19 @@
 module Manageable
   extend ActiveSupport::Concern
 
+  # resource slug => model class. Populated by `manage`, which is why lookups
+  # never have to constantize a caller-supplied string.
+  REGISTRY = {}
+
+  def self.registry
+    # In development and test nothing is loaded until it is referenced, so the
+    # registry is only complete once the app has been eager loaded.
+    Rails.application.eager_load! unless Rails.application.config.eager_load
+    REGISTRY
+  end
+
+  def self.[](slug) = registry[slug.to_s]
+
   Field = Data.define(:name, :type, :options, :label, :align, :required) do
     def belongs_to? = type == :belongs_to
     def key = belongs_to? ? :"#{name}_id" : name
@@ -17,7 +30,8 @@ module Manageable
   class_methods do
     attr_reader :manage_config
 
-    def manage(module_key:, columns:, fields:, icon: nil, search: [], order: nil, per_page: 25)
+    def manage(module_key:, columns:, fields:, icon: nil, search: [], order: nil, per_page: AppConfig[:per_page])
+      REGISTRY[model_name.plural] = self
       @manage_config = {
         module_key:, icon:, search:, per_page:,
         order: order || { id: :desc },

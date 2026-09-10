@@ -4,9 +4,9 @@ class ResourceController < ApplicationController
   class_attribute :model
   class_attribute :tabs, default: {}   # label => path, rendered above the table
 
-  before_action :authorize_read,  only: [:index, :show]
-  before_action :authorize_write, except: [:index, :show]
-  before_action :set_record, only: [:show, :edit, :update, :destroy]
+  before_action :authorize_read,  only: [ :index, :show ]
+  before_action :authorize_write, except: [ :index, :show ]
+  before_action :set_record, only: [ :show, :edit, :update, :destroy ]
 
   def index
     scope = model.all

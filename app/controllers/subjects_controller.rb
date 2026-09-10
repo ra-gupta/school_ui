@@ -22,5 +22,5 @@ class SubjectsController < ApplicationController
 
   private
 
-  def record_params = params.expect(subject: [:name, :code, :subject_type, :grade_id])
+  def record_params = params.expect(subject: [ :name, :code, :subject_type, :grade_id ])
 end

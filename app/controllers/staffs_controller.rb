@@ -1,7 +1,7 @@
 class StaffsController < ApplicationController
-  before_action -> { authorize!("hr.read") },  only: [:index, :show]
-  before_action -> { authorize!("hr.write") }, except: [:index, :show]
-  before_action :set_staff, only: [:show, :edit, :update, :destroy]
+  before_action -> { authorize!("hr.read") },  only: [ :index, :show ]
+  before_action -> { authorize!("hr.write") }, except: [ :index, :show ]
+  before_action :set_staff, only: [ :show, :edit, :update, :destroy ]
 
   def index
     scope = Staff.where(status: params[:status].presence || "active")
@@ -38,8 +38,8 @@ class StaffsController < ApplicationController
   def set_staff = @staff = Staff.find(params[:id])
 
   def staff_params
-    params.expect(staff: [:employee_no, :first_name, :last_name, :designation, :department_id, :joining_date,
+    params.expect(staff: [ :employee_no, :first_name, :last_name, :designation, :department_id, :joining_date,
                           :date_of_birth, :gender, :phone, :email, :qualification, :address,
-                          :basic_salary, :biometric_id, :status])
+                          :basic_salary, :biometric_id, :status ])
   end
 end

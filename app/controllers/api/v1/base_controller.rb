@@ -36,9 +36,9 @@ module Api
       end
       def render_error(message, status) = render(json: { error: message }, status:)
 
-      def paginate(scope, per: 50)
-        page = [params[:page].to_i, 1].max
-        per  = [params[:per_page].to_i, per].max.clamp(1, 200)
+      def paginate(scope, per: AppConfig[:per_page])
+        page = [ params[:page].to_i, 1 ].max
+        per  = [ params[:per_page].to_i, per ].max.clamp(1, 200)
         { page:, per_page: per, total: scope.limit(nil).offset(nil).count,
           data: scope.limit(per).offset((page - 1) * per) }
       end

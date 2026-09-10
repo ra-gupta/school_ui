@@ -1,0 +1,12 @@
+# Copy to config/app_config.yml to override settings on this machine only.
+# That file is gitignored. Anything left out falls back to
+# config/app_config.default.yml.
+#
+# Sections merge: `default` first, then the section for the current environment.
+
+# default:
+#   time_zone: Asia/Kolkata
+#   per_page: 50
+#   seed:
+#     super_admin_email: me@myschool.in
+#     password: something-only-i-know

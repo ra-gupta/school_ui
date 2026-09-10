@@ -7,7 +7,7 @@ module Api
         scope = scope.where(section_id: params[:section_id]) if params[:section_id].present?
         scope = scope.where(attendable_id: params[:student_id]) if params[:student_id].present?
         scope = scope.where(on_date: params[:from].presence || Date.current, on_date: date_range)
-        render json: scope.order(:on_date).as_json(only: [:id, :attendable_id, :section_id, :on_date, :status, :source])
+        render json: scope.order(:on_date).as_json(only: [ :id, :attendable_id, :section_id, :on_date, :status, :source ])
       end
 
       # Bulk mark: [{student_id:, status:}, ...] for one section and date.

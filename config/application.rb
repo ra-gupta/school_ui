@@ -18,6 +18,9 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Every setting this app takes, in one file — see config/app_config.default.yml.
+require_relative "app_config"
+
 module Web
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -25,6 +28,8 @@ module Web
 
     # Postgres-native schema dumps (structure.sql)
     config.active_record.schema_format = :sql
+
+    config.time_zone = AppConfig[:time_zone]
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

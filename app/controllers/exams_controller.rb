@@ -1,7 +1,7 @@
 class ExamsController < ApplicationController
-  before_action -> { authorize!("exams.read") },  only: [:index, :show]
-  before_action -> { authorize!("exams.write") }, except: [:index, :show]
-  before_action :set_exam, only: [:show, :edit, :update, :destroy]
+  before_action -> { authorize!("exams.read") },  only: [ :index, :show ]
+  before_action -> { authorize!("exams.write") }, except: [ :index, :show ]
+  before_action :set_exam, only: [ :show, :edit, :update, :destroy ]
 
   def index = @exams = Exam.where(academic_year: Current.academic_year).order(starts_on: :desc)
 
@@ -32,5 +32,5 @@ class ExamsController < ApplicationController
   private
 
   def set_exam = @exam = Exam.find(params[:id])
-  def exam_params = params.expect(exam: [:name, :exam_type, :starts_on, :ends_on, :published])
+  def exam_params = params.expect(exam: [ :name, :exam_type, :starts_on, :ends_on, :published ])
 end

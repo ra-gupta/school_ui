@@ -1,7 +1,7 @@
 class NoticesController < ApplicationController
-  before_action -> { authorize!("notices.read") },  only: [:index, :show]
-  before_action -> { authorize!("notices.write") }, except: [:index, :show]
-  before_action :set_notice, only: [:show, :edit, :update, :destroy]
+  before_action -> { authorize!("notices.read") },  only: [ :index, :show ]
+  before_action -> { authorize!("notices.write") }, except: [ :index, :show ]
+  before_action :set_notice, only: [ :show, :edit, :update, :destroy ]
 
   def index = @notices = paginate(Notice.order(published_at: :desc, created_at: :desc))
   def show; end
@@ -25,5 +25,5 @@ class NoticesController < ApplicationController
   private
 
   def set_notice = @notice = Notice.find(params[:id])
-  def notice_params = params.expect(notice: [:title, :body, :audience, :section_id, :published_at, :expires_on])
+  def notice_params = params.expect(notice: [ :title, :body, :audience, :section_id, :published_at, :expires_on ])
 end

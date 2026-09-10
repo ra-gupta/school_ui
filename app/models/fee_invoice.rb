@@ -22,9 +22,9 @@ class FeeInvoice < ApplicationRecord
     self.total = fee_invoice_items.sum(:amount)
     self.paid  = fee_payments.where(status: "success").sum(:amount)
     self.status = if paid <= 0 then "unpaid"
-                  elsif balance <= 0 then "paid"
-                  else "partial"
-                  end
+    elsif balance <= 0 then "paid"
+    else "partial"
+    end
     save!
   end
 

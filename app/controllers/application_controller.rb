@@ -54,8 +54,8 @@ class ApplicationController < ActionController::Base
   end
 
   # 6 lines beats a pagination gem.
-  def paginate(scope, per: 25)
-    @page  = [params[:page].to_i, 1].max
+  def paginate(scope, per: AppConfig[:per_page])
+    @page  = [ params[:page].to_i, 1 ].max
     @total = scope.limit(nil).offset(nil).count
     @pages = (@total / per.to_f).ceil
     scope.limit(per).offset((@page - 1) * per)

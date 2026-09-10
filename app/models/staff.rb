@@ -11,5 +11,5 @@ class Staff < ApplicationRecord
 
   scope :active, -> { where(status: "active") }
 
-  def name = [first_name, last_name].compact_blank.join(" ")
+  def name = [ first_name, last_name ].compact_blank.join(" ")
 end

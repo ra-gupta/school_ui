@@ -27,5 +27,5 @@ class FeeStructuresController < ApplicationController
 
   private
 
-  def structure_params = params.expect(fee_structure: [:grade_id, :fee_head_id, :amount, :frequency, :due_day])
+  def structure_params = params.expect(fee_structure: [ :grade_id, :fee_head_id, :amount, :frequency, :due_day ])
 end

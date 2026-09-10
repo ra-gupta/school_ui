@@ -11,7 +11,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.time    :ends_at, null: false
       t.string  :room
       t.timestamps
-      t.index [:section_id, :weekday, :starts_at], name: "idx_slot_unique"
+      t.index [ :section_id, :weekday, :starts_at ], name: "idx_slot_unique"
     end
 
     create_table :exams do |t|
@@ -36,7 +36,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.decimal :pass_marks, precision: 6, scale: 2, default: 33,  null: false
       t.string  :room
       t.timestamps
-      t.index [:exam_id, :section_id, :subject_id], unique: true, name: "idx_exam_schedule_unique"
+      t.index [ :exam_id, :section_id, :subject_id ], unique: true, name: "idx_exam_schedule_unique"
     end
 
     create_table :exam_results do |t|
@@ -47,7 +47,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.boolean :absent, default: false, null: false
       t.string  :remarks
       t.timestamps
-      t.index [:exam_schedule_id, :student_id], unique: true, name: "idx_result_unique"
+      t.index [ :exam_schedule_id, :student_id ], unique: true, name: "idx_result_unique"
     end
 
     create_table :homeworks do |t|
@@ -60,7 +60,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.date    :assigned_on, null: false
       t.date    :due_on
       t.timestamps
-      t.index [:section_id, :due_on]
+      t.index [ :section_id, :due_on ]
     end
 
     create_table :homework_submissions do |t|
@@ -72,7 +72,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.decimal  :marks, precision: 6, scale: 2
       t.string   :feedback
       t.timestamps
-      t.index [:homework_id, :student_id], unique: true
+      t.index [ :homework_id, :student_id ], unique: true
     end
 
     create_table :notices do |t|
@@ -85,7 +85,7 @@ class CreateAcademics < ActiveRecord::Migration[8.1]
       t.datetime :published_at
       t.date     :expires_on
       t.timestamps
-      t.index [:school_id, :published_at]
+      t.index [ :school_id, :published_at ]
     end
   end
 end

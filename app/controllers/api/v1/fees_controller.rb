@@ -17,7 +17,7 @@ module Api
       def pay
         authorize!("fees.collect")
         invoice = FeeInvoice.find(params[:id])
-        payment = invoice.fee_payments.new(params.expect(payment: [:amount, :method, :reference, :gateway, :gateway_ref])
+        payment = invoice.fee_payments.new(params.expect(payment: [ :amount, :method, :reference, :gateway, :gateway_ref ])
                                                  .merge(received_by: current_user))
         return render(json: { error: "invalid", details: payment.errors.to_hash }, status: :unprocessable_entity) unless payment.save
 
@@ -30,7 +30,7 @@ module Api
 
       def family? = current_user.kind.in?(%w[parent student])
       def family_student_ids
-        current_user.student ? [current_user.student.id] : current_user.guardian&.students&.ids.to_a
+        current_user.student ? [ current_user.student.id ] : current_user.guardian&.students&.ids.to_a
       end
     end
   end

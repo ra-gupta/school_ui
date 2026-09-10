@@ -1,10 +1,11 @@
 require "application_system_test_case"
 
 # Smoke test + screenshot generator: every screen listed here must render, and
-# lands in doc/screenshots/. Add a `shot` line when you add a screen.
+# lands in tmp/screenshots/ — for eyeballing locally, deliberately not
+# committed. Add a `shot` line when you add a screen.
 #   bin/rails test:system
 class ScreenshotsTest < ApplicationSystemTestCase
-  OUT = Rails.root.join("doc/screenshots")
+  OUT = Rails.root.join("tmp/screenshots")
 
   # Seed once and keep it: reruns are then fast, and each test still gets a
   # fresh browser session (which is what makes switching users reliable).

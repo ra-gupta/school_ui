@@ -13,7 +13,7 @@ module Api
       private
 
       def my_students
-        @my_students ||= current_user.student ? [current_user.student] : current_user.guardian&.students.to_a
+        @my_students ||= current_user.student ? [ current_user.student ] : current_user.guardian&.students.to_a
       end
 
       def family_summary
@@ -28,7 +28,7 @@ module Api
               homework_due: Homework.where(section_id: s.section&.id, due_on: Date.current..).count
             }
           end,
-          notices: Notice.live.limit(5).as_json(only: [:id, :title, :body, :published_at])
+          notices: Notice.live.limit(5).as_json(only: [ :id, :title, :body, :published_at ])
         }
       end
 
@@ -40,7 +40,7 @@ module Api
           collected_this_month: FeePayment.where(paid_at: Date.current.all_month, status: "success").sum(:amount).to_f,
           outstanding: FeeInvoice.unpaid.sum("total + fine - discount - paid").to_f,
           my_classes: current_user.staff&.sections&.map { { id: it.id, name: it.full_name } }.to_a,
-          notices: Notice.live.limit(5).as_json(only: [:id, :title, :body, :published_at])
+          notices: Notice.live.limit(5).as_json(only: [ :id, :title, :body, :published_at ])
         }
       end
 
@@ -48,9 +48,9 @@ module Api
         vehicle = Vehicle.find_by(driver_id: current_user.staff&.id)
         {
           role: "driver",
-          vehicle: vehicle&.as_json(only: [:id, :registration_no, :model]),
+          vehicle: vehicle&.as_json(only: [ :id, :registration_no, :model ]),
           routes: vehicle&.transport_routes&.map { |r|
-            { id: r.id, name: r.name, stops: r.route_stops.as_json(only: [:id, :name, :pickup_at, :drop_at, :latitude, :longitude]) }
+            { id: r.id, name: r.name, stops: r.route_stops.as_json(only: [ :id, :name, :pickup_at, :drop_at, :latitude, :longitude ]) }
           }.to_a
         }
       end

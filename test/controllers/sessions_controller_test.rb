@@ -1,7 +1,12 @@
 require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
-  setup { @user = User.take }
+  setup do
+    # The users fixture was removed when the schema grew NOT NULL name/kind
+    # columns, so these build the account they need.
+    @user = User.create!(name: "Platform Admin", email_address: "admin@erp.test",
+                         kind: "super_admin", password: "password")
+  end
 
   test "new" do
     get new_session_path
@@ -23,7 +28,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy" do
-    sign_in_as(User.take)
+    sign_in_as(@user)
 
     delete session_path
 

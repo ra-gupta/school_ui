@@ -22,5 +22,5 @@ class SectionsController < ApplicationController
 
   private
 
-  def record_params = params.expect(section: [:grade_id, :name, :capacity, :room, :class_teacher_id])
+  def record_params = params.expect(section: [ :grade_id, :name, :capacity, :room, :class_teacher_id ])
 end

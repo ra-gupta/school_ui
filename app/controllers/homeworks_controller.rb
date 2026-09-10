@@ -1,7 +1,7 @@
 class HomeworksController < ApplicationController
-  before_action -> { authorize!("homework.read") },  only: [:index, :show]
-  before_action -> { authorize!("homework.write") }, except: [:index, :show]
-  before_action :set_homework, only: [:show, :edit, :update, :destroy]
+  before_action -> { authorize!("homework.read") },  only: [ :index, :show ]
+  before_action -> { authorize!("homework.write") }, except: [ :index, :show ]
+  before_action :set_homework, only: [ :show, :edit, :update, :destroy ]
 
   def index
     scope = Homework.includes(:section, :subject, :staff)
@@ -31,5 +31,5 @@ class HomeworksController < ApplicationController
   private
 
   def set_homework = @homework = Homework.find(params[:id])
-  def homework_params = params.expect(homework: [:section_id, :subject_id, :staff_id, :title, :description, :assigned_on, :due_on])
+  def homework_params = params.expect(homework: [ :section_id, :subject_id, :staff_id, :title, :description, :assigned_on, :due_on ])
 end

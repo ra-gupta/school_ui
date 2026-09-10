@@ -1,0 +1,36 @@
+# Everything this app can be configured with, in one place.
+#
+# The environment always wins: each value is `ENV.fetch("NAME", fallback)`, so
+# this file holds the fallback and never a secret. To override a value on one
+# machine without exporting variables, copy config/app_config.yml.example to
+# config/app_config.yml — that file is gitignored and merges on top of this one.
+#
+# Per-school settings — name, address, branding, currency, enabled modules —
+# are not here. They live on the schools table and are edited in the super
+# admin panel, because the school changes them, not the developer.
+
+default:
+  # Dates, "today's collection" and attendance days are computed in this zone.
+  # A school's own timezone column overrides it for display; this is the default
+  # the application itself runs in.
+  time_zone: <%= ENV.fetch("TIME_ZONE", "Asia/Kolkata") %>
+
+  # Rows per page in every list screen and in the JSON API's default page size.
+  per_page: <%= ENV.fetch("PER_PAGE", 25) %>
+
+  # Accounts created by `bin/rails db:seed`. Change the password after the first
+  # sign-in, or set SEED_PASSWORD before seeding.
+  seed:
+    super_admin_email: <%= ENV.fetch("SUPER_ADMIN_EMAIL", "super@erp.test") %>
+    password: <%= ENV.fetch("SEED_PASSWORD", "password") %>
+
+development:
+
+test:
+  # Kept explicit so a stray SEED_PASSWORD in a shell cannot change what the
+  # system tests sign in with.
+  seed:
+    super_admin_email: super@erp.test
+    password: password
+
+production:

@@ -9,7 +9,7 @@ class Attendance < ApplicationRecord
 
   validates :on_date, presence: true
   validates :status, inclusion: { in: STATUSES }
-  validates :attendable_id, uniqueness: { scope: [:attendable_type, :on_date] }
+  validates :attendable_id, uniqueness: { scope: [ :attendable_type, :on_date ] }
 
   scope :on, ->(date) { where(on_date: date) }
   scope :present, -> { where(status: %w[present late half_day]) }

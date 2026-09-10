@@ -10,13 +10,13 @@ class GatePass < ApplicationRecord
   scope :pending, -> { where(status: "pending") }
 
   manage module_key: "gate_pass", search: %w[reason], order: { out_at: :desc },
-         columns: [{ name: :student, type: :belongs_to }, { name: :staff, type: :belongs_to },
-                   :reason, { name: :out_at, type: :datetime }, { name: :in_at, type: :datetime }, :status],
-         fields: [{ name: :student, type: :belongs_to, options: -> { Student.active.order(:first_name) } },
+         columns: [ { name: :student, type: :belongs_to }, { name: :staff, type: :belongs_to },
+                   :reason, { name: :out_at, type: :datetime }, { name: :in_at, type: :datetime }, :status ],
+         fields: [ { name: :student, type: :belongs_to, options: -> { Student.active.order(:first_name) } },
                   { name: :staff, type: :belongs_to, options: -> { Staff.active.order(:first_name) } },
                   { name: :reason, required: true }, { name: :out_at, type: :datetime, required: true },
                   { name: :in_at, type: :datetime },
-                  { name: :status, type: :select, options: %w[pending approved rejected returned] }]
+                  { name: :status, type: :select, options: %w[pending approved rejected returned] } ]
 
   def name = reason
 end

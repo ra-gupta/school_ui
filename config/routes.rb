@@ -17,19 +17,19 @@ Rails.application.routes.draw do
     resources :staffs, path: "", as: :staffs
   end
 
-  resource :attendance, only: [:show, :update], controller: "attendance"
+  resource :attendance, only: [ :show, :update ], controller: "attendance"
 
   scope "/fees" do
     root "fee_invoices#index", as: :fees
     resources :fee_invoices, path: "invoices" do
-      resources :fee_payments, only: [:create, :destroy], path: "payments"
+      resources :fee_payments, only: [ :create, :destroy ], path: "payments"
     end
-    resources :fee_structures, path: "structures", except: [:show]
-    resources :fee_heads, path: "heads", except: [:show, :new, :edit]
+    resources :fee_structures, path: "structures", except: [ :show ]
+    resources :fee_heads, path: "heads", except: [ :show, :new, :edit ]
   end
 
   resources :exams do
-    resources :exam_schedules, only: [:create, :destroy], path: "papers"
+    resources :exam_schedules, only: [ :create, :destroy ], path: "papers"
     get "papers/:exam_schedule_id/marks", to: "exam_results#edit", as: :marks
     patch "papers/:exam_schedule_id/marks", to: "exam_results#update"
   end
@@ -40,9 +40,9 @@ Rails.application.routes.draw do
 
   scope "/academics" do
     root "academics#index", as: :academics
-    resources :grades,   except: [:show]
-    resources :sections, except: [:show]
-    resources :subjects, except: [:show]
+    resources :grades,   except: [ :show ]
+    resources :sections, except: [ :show ]
+    resources :subjects, except: [ :show ]
   end
 
   # ---- Modules on the generic resource controller -------------------------
@@ -103,7 +103,7 @@ Rails.application.routes.draw do
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do
     namespace :v1 do
-      resource  :session, only: [:create, :destroy]
+      resource  :session, only: [ :create, :destroy ]
       get "me", to: "users#me"
       get "dashboard", to: "dashboard#show"
 
