@@ -7,6 +7,16 @@ Last session: 2026-09-09.
 
 ---
 
+## Requested, not yet built
+
+- **Mobile-number login for parents and students.** They should be able to sign in with
+  their phone number as well as an email address. Needs: a partial unique index on
+  `users.phone`, a `normalizes` rule so a typed number and a stored one match exactly,
+  and a `login` field that routes to `authenticate_by(email_address:)` or
+  `authenticate_by(phone:)` — keeping `authenticate_by` rather than `find_by` so the
+  constant-time comparison is not lost. Seeds currently generate the same parent phone
+  numbers in both schools, so they need a per-school prefix before the index can go on.
+
 ## Where to pick up
 
 **Next task: build the remaining 35 web modules on the `Manageable` foundation, then the Flutter app.**

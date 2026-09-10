@@ -453,6 +453,77 @@ ALTER SEQUENCE public.certificate_templates_id_seq OWNED BY public.certificate_t
 
 
 --
+-- Name: chat_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chat_messages (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    sender_id bigint NOT NULL,
+    body text NOT NULL,
+    read_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: chat_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chat_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chat_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chat_messages_id_seq OWNED BY public.chat_messages.id;
+
+
+--
+-- Name: conversations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.conversations (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    student_id bigint,
+    staff_id bigint NOT NULL,
+    guardian_id bigint,
+    subject character varying,
+    last_message_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: conversations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.conversations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: conversations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.conversations_id_seq OWNED BY public.conversations.id;
+
+
+--
 -- Name: departments; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -890,6 +961,43 @@ ALTER SEQUENCE public.grades_id_seq OWNED BY public.grades.id;
 
 
 --
+-- Name: greeting_campaigns; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.greeting_campaigns (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    title character varying NOT NULL,
+    occasion character varying DEFAULT 'birthday'::character varying NOT NULL,
+    audience character varying DEFAULT 'students'::character varying NOT NULL,
+    message text,
+    background_color character varying DEFAULT '#4f46e5'::character varying NOT NULL,
+    automatic boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: greeting_campaigns_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.greeting_campaigns_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: greeting_campaigns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.greeting_campaigns_id_seq OWNED BY public.greeting_campaigns.id;
+
+
+--
 -- Name: guardians; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1297,6 +1405,43 @@ ALTER SEQUENCE public.issued_certificates_id_seq OWNED BY public.issued_certific
 
 
 --
+-- Name: kb_articles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.kb_articles (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    title character varying NOT NULL,
+    category character varying,
+    body text NOT NULL,
+    audience character varying DEFAULT 'all'::character varying NOT NULL,
+    published boolean DEFAULT true NOT NULL,
+    views integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: kb_articles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.kb_articles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: kb_articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.kb_articles_id_seq OWNED BY public.kb_articles.id;
+
+
+--
 -- Name: ledger_entries; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1333,6 +1478,84 @@ CREATE SEQUENCE public.ledger_entries_id_seq
 --
 
 ALTER SEQUENCE public.ledger_entries_id_seq OWNED BY public.ledger_entries.id;
+
+
+--
+-- Name: message_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.message_logs (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    message_template_id bigint,
+    sent_by_id bigint,
+    channel character varying DEFAULT 'sms'::character varying NOT NULL,
+    audience character varying DEFAULT 'all'::character varying NOT NULL,
+    recipient character varying,
+    subject character varying,
+    body text NOT NULL,
+    status character varying DEFAULT 'queued'::character varying NOT NULL,
+    recipient_count integer DEFAULT 1 NOT NULL,
+    sent_at timestamp(6) without time zone,
+    error character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: message_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.message_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.message_logs_id_seq OWNED BY public.message_logs.id;
+
+
+--
+-- Name: message_templates; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.message_templates (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    name character varying NOT NULL,
+    channel character varying DEFAULT 'sms'::character varying NOT NULL,
+    subject character varying,
+    body text NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.message_templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.message_templates_id_seq OWNED BY public.message_templates.id;
 
 
 --
@@ -1485,6 +1708,82 @@ CREATE SEQUENCE public.postal_records_id_seq
 --
 
 ALTER SEQUENCE public.postal_records_id_seq OWNED BY public.postal_records.id;
+
+
+--
+-- Name: ptm_meetings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ptm_meetings (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    section_id bigint,
+    title character varying NOT NULL,
+    on_date date NOT NULL,
+    starts_at time without time zone,
+    ends_at time without time zone,
+    slot_minutes integer DEFAULT 15 NOT NULL,
+    venue character varying,
+    status character varying DEFAULT 'scheduled'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ptm_meetings_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ptm_meetings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ptm_meetings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ptm_meetings_id_seq OWNED BY public.ptm_meetings.id;
+
+
+--
+-- Name: ptm_slots; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ptm_slots (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    ptm_meeting_id bigint NOT NULL,
+    staff_id bigint,
+    student_id bigint,
+    starts_at time without time zone NOT NULL,
+    status character varying DEFAULT 'open'::character varying NOT NULL,
+    remarks text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ptm_slots_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ptm_slots_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ptm_slots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ptm_slots_id_seq OWNED BY public.ptm_slots.id;
 
 
 --
@@ -1924,6 +2223,117 @@ ALTER SEQUENCE public.subjects_id_seq OWNED BY public.subjects.id;
 
 
 --
+-- Name: survey_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.survey_questions (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    survey_id bigint NOT NULL,
+    prompt character varying NOT NULL,
+    kind character varying DEFAULT 'rating'::character varying NOT NULL,
+    choices character varying[] DEFAULT '{}'::character varying[] NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    required boolean DEFAULT true NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: survey_questions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.survey_questions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: survey_questions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.survey_questions_id_seq OWNED BY public.survey_questions.id;
+
+
+--
+-- Name: survey_responses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.survey_responses (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    survey_question_id bigint NOT NULL,
+    user_id bigint,
+    rating integer,
+    choice character varying,
+    answer text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: survey_responses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.survey_responses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: survey_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.survey_responses_id_seq OWNED BY public.survey_responses.id;
+
+
+--
+-- Name: surveys; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.surveys (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    title character varying NOT NULL,
+    description text,
+    audience character varying DEFAULT 'parents'::character varying NOT NULL,
+    opens_on date,
+    closes_on date,
+    anonymous boolean DEFAULT false NOT NULL,
+    status character varying DEFAULT 'draft'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: surveys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.surveys_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.surveys_id_seq OWNED BY public.surveys.id;
+
+
+--
 -- Name: timetable_slots; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2188,6 +2598,43 @@ ALTER SEQUENCE public.visitors_id_seq OWNED BY public.visitors.id;
 
 
 --
+-- Name: web_pages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.web_pages (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    title character varying NOT NULL,
+    slug character varying NOT NULL,
+    body text,
+    section character varying DEFAULT 'page'::character varying NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    published boolean DEFAULT false NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: web_pages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.web_pages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: web_pages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.web_pages_id_seq OWNED BY public.web_pages.id;
+
+
+--
 -- Name: academic_years id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2262,6 +2709,20 @@ ALTER TABLE ONLY public.campus_workers ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.certificate_templates ALTER COLUMN id SET DEFAULT nextval('public.certificate_templates_id_seq'::regclass);
+
+
+--
+-- Name: chat_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_messages ALTER COLUMN id SET DEFAULT nextval('public.chat_messages_id_seq'::regclass);
+
+
+--
+-- Name: conversations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations ALTER COLUMN id SET DEFAULT nextval('public.conversations_id_seq'::regclass);
 
 
 --
@@ -2349,6 +2810,13 @@ ALTER TABLE ONLY public.grades ALTER COLUMN id SET DEFAULT nextval('public.grade
 
 
 --
+-- Name: greeting_campaigns id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.greeting_campaigns ALTER COLUMN id SET DEFAULT nextval('public.greeting_campaigns_id_seq'::regclass);
+
+
+--
 -- Name: guardians id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2426,10 +2894,31 @@ ALTER TABLE ONLY public.issued_certificates ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: kb_articles id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.kb_articles ALTER COLUMN id SET DEFAULT nextval('public.kb_articles_id_seq'::regclass);
+
+
+--
 -- Name: ledger_entries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ledger_entries ALTER COLUMN id SET DEFAULT nextval('public.ledger_entries_id_seq'::regclass);
+
+
+--
+-- Name: message_logs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs ALTER COLUMN id SET DEFAULT nextval('public.message_logs_id_seq'::regclass);
+
+
+--
+-- Name: message_templates id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_templates ALTER COLUMN id SET DEFAULT nextval('public.message_templates_id_seq'::regclass);
 
 
 --
@@ -2458,6 +2947,20 @@ ALTER TABLE ONLY public.phone_logs ALTER COLUMN id SET DEFAULT nextval('public.p
 --
 
 ALTER TABLE ONLY public.postal_records ALTER COLUMN id SET DEFAULT nextval('public.postal_records_id_seq'::regclass);
+
+
+--
+-- Name: ptm_meetings id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_meetings ALTER COLUMN id SET DEFAULT nextval('public.ptm_meetings_id_seq'::regclass);
+
+
+--
+-- Name: ptm_slots id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots ALTER COLUMN id SET DEFAULT nextval('public.ptm_slots_id_seq'::regclass);
 
 
 --
@@ -2538,6 +3041,27 @@ ALTER TABLE ONLY public.subjects ALTER COLUMN id SET DEFAULT nextval('public.sub
 
 
 --
+-- Name: survey_questions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_questions ALTER COLUMN id SET DEFAULT nextval('public.survey_questions_id_seq'::regclass);
+
+
+--
+-- Name: survey_responses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_responses ALTER COLUMN id SET DEFAULT nextval('public.survey_responses_id_seq'::regclass);
+
+
+--
+-- Name: surveys id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.surveys ALTER COLUMN id SET DEFAULT nextval('public.surveys_id_seq'::regclass);
+
+
+--
 -- Name: timetable_slots id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2584,6 +3108,13 @@ ALTER TABLE ONLY public.vehicles ALTER COLUMN id SET DEFAULT nextval('public.veh
 --
 
 ALTER TABLE ONLY public.visitors ALTER COLUMN id SET DEFAULT nextval('public.visitors_id_seq'::regclass);
+
+
+--
+-- Name: web_pages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_pages ALTER COLUMN id SET DEFAULT nextval('public.web_pages_id_seq'::regclass);
 
 
 --
@@ -2683,6 +3214,22 @@ ALTER TABLE ONLY public.certificate_templates
 
 
 --
+-- Name: chat_messages chat_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_messages
+    ADD CONSTRAINT chat_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: conversations conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT conversations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: departments departments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2779,6 +3326,14 @@ ALTER TABLE ONLY public.grades
 
 
 --
+-- Name: greeting_campaigns greeting_campaigns_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.greeting_campaigns
+    ADD CONSTRAINT greeting_campaigns_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: guardians guardians_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2867,11 +3422,35 @@ ALTER TABLE ONLY public.issued_certificates
 
 
 --
+-- Name: kb_articles kb_articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.kb_articles
+    ADD CONSTRAINT kb_articles_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: ledger_entries ledger_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ledger_entries
     ADD CONSTRAINT ledger_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_logs message_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs
+    ADD CONSTRAINT message_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_templates message_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_templates
+    ADD CONSTRAINT message_templates_pkey PRIMARY KEY (id);
 
 
 --
@@ -2904,6 +3483,22 @@ ALTER TABLE ONLY public.phone_logs
 
 ALTER TABLE ONLY public.postal_records
     ADD CONSTRAINT postal_records_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ptm_meetings ptm_meetings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_meetings
+    ADD CONSTRAINT ptm_meetings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ptm_slots ptm_slots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots
+    ADD CONSTRAINT ptm_slots_pkey PRIMARY KEY (id);
 
 
 --
@@ -3003,6 +3598,30 @@ ALTER TABLE ONLY public.subjects
 
 
 --
+-- Name: survey_questions survey_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_questions
+    ADD CONSTRAINT survey_questions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: survey_responses survey_responses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT survey_responses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: surveys surveys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.surveys
+    ADD CONSTRAINT surveys_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: timetable_slots timetable_slots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3059,6 +3678,14 @@ ALTER TABLE ONLY public.visitors
 
 
 --
+-- Name: web_pages web_pages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_pages
+    ADD CONSTRAINT web_pages_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: idx_attendance_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3084,6 +3711,13 @@ CREATE UNIQUE INDEX idx_fee_structure_unique ON public.fee_structures USING btre
 --
 
 CREATE UNIQUE INDEX idx_on_student_id_transport_route_id_c368514e60 ON public.transport_assignments USING btree (student_id, transport_route_id);
+
+
+--
+-- Name: idx_ptm_slot_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ptm_slot_unique ON public.ptm_slots USING btree (ptm_meeting_id, staff_id, starts_at);
 
 
 --
@@ -3315,6 +3949,69 @@ CREATE INDEX index_campus_workers_on_school_id ON public.campus_workers USING bt
 --
 
 CREATE INDEX index_certificate_templates_on_school_id ON public.certificate_templates USING btree (school_id);
+
+
+--
+-- Name: index_chat_messages_on_conversation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chat_messages_on_conversation_id ON public.chat_messages USING btree (conversation_id);
+
+
+--
+-- Name: index_chat_messages_on_conversation_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chat_messages_on_conversation_id_and_created_at ON public.chat_messages USING btree (conversation_id, created_at);
+
+
+--
+-- Name: index_chat_messages_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chat_messages_on_school_id ON public.chat_messages USING btree (school_id);
+
+
+--
+-- Name: index_chat_messages_on_sender_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chat_messages_on_sender_id ON public.chat_messages USING btree (sender_id);
+
+
+--
+-- Name: index_conversations_on_guardian_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_guardian_id ON public.conversations USING btree (guardian_id);
+
+
+--
+-- Name: index_conversations_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_school_id ON public.conversations USING btree (school_id);
+
+
+--
+-- Name: index_conversations_on_school_id_and_last_message_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_school_id_and_last_message_at ON public.conversations USING btree (school_id, last_message_at);
+
+
+--
+-- Name: index_conversations_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_staff_id ON public.conversations USING btree (staff_id);
+
+
+--
+-- Name: index_conversations_on_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_student_id ON public.conversations USING btree (student_id);
 
 
 --
@@ -3584,6 +4281,13 @@ CREATE UNIQUE INDEX index_grades_on_school_id_and_name ON public.grades USING bt
 
 
 --
+-- Name: index_greeting_campaigns_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_greeting_campaigns_on_school_id ON public.greeting_campaigns USING btree (school_id);
+
+
+--
 -- Name: index_guardians_on_school_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3815,6 +4519,20 @@ CREATE INDEX index_issued_certificates_on_student_id ON public.issued_certificat
 
 
 --
+-- Name: index_kb_articles_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_kb_articles_on_school_id ON public.kb_articles USING btree (school_id);
+
+
+--
+-- Name: index_kb_articles_on_school_id_and_category; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_kb_articles_on_school_id_and_category ON public.kb_articles USING btree (school_id, category);
+
+
+--
 -- Name: index_ledger_entries_on_recorded_by_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3833,6 +4551,41 @@ CREATE INDEX index_ledger_entries_on_school_id ON public.ledger_entries USING bt
 --
 
 CREATE INDEX index_ledger_entries_on_school_id_and_on_date ON public.ledger_entries USING btree (school_id, on_date);
+
+
+--
+-- Name: index_message_logs_on_message_template_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_message_template_id ON public.message_logs USING btree (message_template_id);
+
+
+--
+-- Name: index_message_logs_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_school_id ON public.message_logs USING btree (school_id);
+
+
+--
+-- Name: index_message_logs_on_school_id_and_sent_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_school_id_and_sent_at ON public.message_logs USING btree (school_id, sent_at);
+
+
+--
+-- Name: index_message_logs_on_sent_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_logs_on_sent_by_id ON public.message_logs USING btree (sent_by_id);
+
+
+--
+-- Name: index_message_templates_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_message_templates_on_school_id ON public.message_templates USING btree (school_id);
 
 
 --
@@ -3896,6 +4649,55 @@ CREATE INDEX index_phone_logs_on_school_id ON public.phone_logs USING btree (sch
 --
 
 CREATE INDEX index_postal_records_on_school_id ON public.postal_records USING btree (school_id);
+
+
+--
+-- Name: index_ptm_meetings_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_meetings_on_school_id ON public.ptm_meetings USING btree (school_id);
+
+
+--
+-- Name: index_ptm_meetings_on_school_id_and_on_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_meetings_on_school_id_and_on_date ON public.ptm_meetings USING btree (school_id, on_date);
+
+
+--
+-- Name: index_ptm_meetings_on_section_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_meetings_on_section_id ON public.ptm_meetings USING btree (section_id);
+
+
+--
+-- Name: index_ptm_slots_on_ptm_meeting_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_slots_on_ptm_meeting_id ON public.ptm_slots USING btree (ptm_meeting_id);
+
+
+--
+-- Name: index_ptm_slots_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_slots_on_school_id ON public.ptm_slots USING btree (school_id);
+
+
+--
+-- Name: index_ptm_slots_on_staff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_slots_on_staff_id ON public.ptm_slots USING btree (staff_id);
+
+
+--
+-- Name: index_ptm_slots_on_student_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ptm_slots_on_student_id ON public.ptm_slots USING btree (student_id);
 
 
 --
@@ -4130,6 +4932,55 @@ CREATE INDEX index_subjects_on_school_id_and_code ON public.subjects USING btree
 
 
 --
+-- Name: index_survey_questions_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_questions_on_school_id ON public.survey_questions USING btree (school_id);
+
+
+--
+-- Name: index_survey_questions_on_survey_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_questions_on_survey_id ON public.survey_questions USING btree (survey_id);
+
+
+--
+-- Name: index_survey_responses_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_responses_on_school_id ON public.survey_responses USING btree (school_id);
+
+
+--
+-- Name: index_survey_responses_on_survey_question_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_responses_on_survey_question_id ON public.survey_responses USING btree (survey_question_id);
+
+
+--
+-- Name: index_survey_responses_on_survey_question_id_and_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_responses_on_survey_question_id_and_user_id ON public.survey_responses USING btree (survey_question_id, user_id);
+
+
+--
+-- Name: index_survey_responses_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_survey_responses_on_user_id ON public.survey_responses USING btree (user_id);
+
+
+--
+-- Name: index_surveys_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_surveys_on_school_id ON public.surveys USING btree (school_id);
+
+
+--
 -- Name: index_timetable_slots_on_academic_year_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4284,11 +5135,33 @@ CREATE INDEX index_visitors_on_school_id_and_in_at ON public.visitors USING btre
 
 
 --
+-- Name: index_web_pages_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_web_pages_on_school_id ON public.web_pages USING btree (school_id);
+
+
+--
+-- Name: index_web_pages_on_school_id_and_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_web_pages_on_school_id_and_slug ON public.web_pages USING btree (school_id, slug);
+
+
+--
 -- Name: timetable_slots fk_rails_03bbd967c8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timetable_slots
     ADD CONSTRAINT fk_rails_03bbd967c8 FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
+-- Name: message_logs fk_rails_049c65a729; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs
+    ADD CONSTRAINT fk_rails_049c65a729 FOREIGN KEY (sent_by_id) REFERENCES public.users(id);
 
 
 --
@@ -4372,6 +5245,14 @@ ALTER TABLE ONLY public.exam_schedules
 
 
 --
+-- Name: ptm_meetings fk_rails_177a642180; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_meetings
+    ADD CONSTRAINT fk_rails_177a642180 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: homework_submissions fk_rails_1954c411ec; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4401,6 +5282,14 @@ ALTER TABLE ONLY public.ledger_entries
 
 ALTER TABLE ONLY public.issued_certificates
     ADD CONSTRAINT fk_rails_1fc940026d FOREIGN KEY (issued_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: survey_responses fk_rails_2368f705b4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT fk_rails_2368f705b4 FOREIGN KEY (survey_question_id) REFERENCES public.survey_questions(id);
 
 
 --
@@ -4484,6 +5373,14 @@ ALTER TABLE ONLY public.subjects
 
 
 --
+-- Name: ptm_slots fk_rails_34607f45cb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots
+    ADD CONSTRAINT fk_rails_34607f45cb FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
+
+
+--
 -- Name: assets fk_rails_3862b8168a; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4532,6 +5429,14 @@ ALTER TABLE ONLY public.visitors
 
 
 --
+-- Name: ptm_slots fk_rails_3ffc744f23; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots
+    ADD CONSTRAINT fk_rails_3ffc744f23 FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
 -- Name: subject_assignments fk_rails_40ce893fc7; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4545,6 +5450,14 @@ ALTER TABLE ONLY public.subject_assignments
 
 ALTER TABLE ONLY public.exam_schedules
     ADD CONSTRAINT fk_rails_4320912b40 FOREIGN KEY (section_id) REFERENCES public.sections(id);
+
+
+--
+-- Name: message_logs fk_rails_438d6ab342; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs
+    ADD CONSTRAINT fk_rails_438d6ab342 FOREIGN KEY (message_template_id) REFERENCES public.message_templates(id);
 
 
 --
@@ -4612,6 +5525,14 @@ ALTER TABLE ONLY public.id_card_templates
 
 
 --
+-- Name: surveys fk_rails_4e4d727e4b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.surveys
+    ADD CONSTRAINT fk_rails_4e4d727e4b FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: cameras fk_rails_50b1469579; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4625,6 +5546,14 @@ ALTER TABLE ONLY public.cameras
 
 ALTER TABLE ONLY public.ledger_entries
     ADD CONSTRAINT fk_rails_542d5ae6d9 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: conversations fk_rails_5483ccdb4e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT fk_rails_5483ccdb4e FOREIGN KEY (student_id) REFERENCES public.students(id);
 
 
 --
@@ -4676,11 +5605,27 @@ ALTER TABLE ONLY public.sections
 
 
 --
+-- Name: chat_messages fk_rails_6223514182; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_messages
+    ADD CONSTRAINT fk_rails_6223514182 FOREIGN KEY (sender_id) REFERENCES public.users(id);
+
+
+--
 -- Name: guardianships fk_rails_627583fa81; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.guardianships
     ADD CONSTRAINT fk_rails_627583fa81 FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+
+--
+-- Name: conversations fk_rails_6544715e63; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT fk_rails_6544715e63 FOREIGN KEY (guardian_id) REFERENCES public.guardians(id);
 
 
 --
@@ -4745,6 +5690,14 @@ ALTER TABLE ONLY public.vehicles
 
 ALTER TABLE ONLY public.enrollments
     ADD CONSTRAINT fk_rails_6e4789b133 FOREIGN KEY (section_id) REFERENCES public.sections(id);
+
+
+--
+-- Name: chat_messages fk_rails_6ede0d6992; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_messages
+    ADD CONSTRAINT fk_rails_6ede0d6992 FOREIGN KEY (conversation_id) REFERENCES public.conversations(id);
 
 
 --
@@ -4820,6 +5773,14 @@ ALTER TABLE ONLY public.homeworks
 
 
 --
+-- Name: survey_responses fk_rails_7a71a34959; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT fk_rails_7a71a34959 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: gate_passes fk_rails_7c1ee1aa5a; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4849,6 +5810,14 @@ ALTER TABLE ONLY public.subjects
 
 ALTER TABLE ONLY public.hostel_allocations
     ADD CONSTRAINT fk_rails_81f24e54b2 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: chat_messages fk_rails_82df60ae55; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chat_messages
+    ADD CONSTRAINT fk_rails_82df60ae55 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -4972,11 +5941,43 @@ ALTER TABLE ONLY public.transport_assignments
 
 
 --
+-- Name: ptm_slots fk_rails_a8f56f79c7; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots
+    ADD CONSTRAINT fk_rails_a8f56f79c7 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: survey_questions fk_rails_aa7c176f23; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_questions
+    ADD CONSTRAINT fk_rails_aa7c176f23 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: transport_routes fk_rails_afb3d500a0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.transport_routes
     ADD CONSTRAINT fk_rails_afb3d500a0 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: survey_responses fk_rails_b0f344463a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_responses
+    ADD CONSTRAINT fk_rails_b0f344463a FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: conversations fk_rails_b453318abb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT fk_rails_b453318abb FOREIGN KEY (staff_id) REFERENCES public.staffs(id);
 
 
 --
@@ -5004,6 +6005,14 @@ ALTER TABLE ONLY public.sections
 
 
 --
+-- Name: ptm_meetings fk_rails_bb388ea6e2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_meetings
+    ADD CONSTRAINT fk_rails_bb388ea6e2 FOREIGN KEY (section_id) REFERENCES public.sections(id);
+
+
+--
 -- Name: gate_passes fk_rails_bb89bbbda8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5012,11 +6021,35 @@ ALTER TABLE ONLY public.gate_passes
 
 
 --
+-- Name: greeting_campaigns fk_rails_bbc2672aa1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.greeting_campaigns
+    ADD CONSTRAINT fk_rails_bbc2672aa1 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: ptm_slots fk_rails_bc45edb99d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ptm_slots
+    ADD CONSTRAINT fk_rails_bc45edb99d FOREIGN KEY (ptm_meeting_id) REFERENCES public.ptm_meetings(id);
+
+
+--
 -- Name: homeworks fk_rails_bf610ddb0f; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.homeworks
     ADD CONSTRAINT fk_rails_bf610ddb0f FOREIGN KEY (section_id) REFERENCES public.sections(id);
+
+
+--
+-- Name: web_pages fk_rails_c130f13ef2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_pages
+    ADD CONSTRAINT fk_rails_c130f13ef2 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5044,6 +6077,14 @@ ALTER TABLE ONLY public.homework_submissions
 
 
 --
+-- Name: conversations fk_rails_c4fdc13de0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT fk_rails_c4fdc13de0 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: issued_certificates fk_rails_c5cb9d496d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5057,6 +6098,14 @@ ALTER TABLE ONLY public.issued_certificates
 
 ALTER TABLE ONLY public.fee_structures
     ADD CONSTRAINT fk_rails_cd7cf65377 FOREIGN KEY (grade_id) REFERENCES public.grades(id);
+
+
+--
+-- Name: survey_questions fk_rails_d0558bfd89; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.survey_questions
+    ADD CONSTRAINT fk_rails_d0558bfd89 FOREIGN KEY (survey_id) REFERENCES public.surveys(id);
 
 
 --
@@ -5076,6 +6125,14 @@ ALTER TABLE ONLY public.attendances
 
 
 --
+-- Name: message_logs fk_rails_d35498a84d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_logs
+    ADD CONSTRAINT fk_rails_d35498a84d FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: route_stops fk_rails_d6208c0847; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5089,6 +6146,14 @@ ALTER TABLE ONLY public.route_stops
 
 ALTER TABLE ONLY public.fee_invoice_items
     ADD CONSTRAINT fk_rails_d6b39655f7 FOREIGN KEY (fee_invoice_id) REFERENCES public.fee_invoices(id);
+
+
+--
+-- Name: message_templates fk_rails_d7bfadd7b6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.message_templates
+    ADD CONSTRAINT fk_rails_d7bfadd7b6 FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --
@@ -5212,6 +6277,14 @@ ALTER TABLE ONLY public.transport_routes
 
 
 --
+-- Name: kb_articles fk_rails_ebd1b1ab74; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.kb_articles
+    ADD CONSTRAINT fk_rails_ebd1b1ab74 FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: enrollments fk_rails_f01c555e06; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5290,6 +6363,7 @@ ALTER TABLE ONLY public.book_issues
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260910110000'),
 ('20260910100000'),
 ('20260910090000'),
 ('20260909170500'),

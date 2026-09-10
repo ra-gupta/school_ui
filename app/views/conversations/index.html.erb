@@ -1,0 +1,62 @@
+<% content_for :title, "Messages" %>
+<%= render "shared/header", title: "Parent–teacher chat" %>
+
+<div class="grid gap-4 lg:grid-cols-3">
+  <aside class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <ul class="max-h-[36rem] divide-y divide-slate-100 overflow-y-auto text-sm">
+      <% @conversations.each do |c| %>
+        <% active = @conversation&.id == c.id %>
+        <li>
+          <%= link_to c, class: "flex items-start gap-3 p-3 #{active ? "bg-slate-100" : "hover:bg-slate-50"}" do %>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-50 text-sm font-semibold text-indigo-700">
+              <%= (c.student&.name || c.staff&.name).to_s.first %>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-medium"><%= c.title %></span>
+              <span class="block truncate text-xs text-slate-500"><%= c.chat_messages.last&.body || "No messages yet" %></span>
+            </span>
+            <% unread = c.unread_for(current_user) %>
+            <% if unread.positive? %>
+              <span class="rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white"><%= unread %></span>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+      <% if @conversations.empty? %><li class="p-6 text-center text-slate-400">No conversations yet.</li><% end %>
+    </ul>
+  </aside>
+
+  <section class="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+    <% if @conversation %>
+      <header class="border-b border-slate-200 px-5 py-3">
+        <p class="font-medium"><%= @conversation.title %></p>
+        <p class="text-xs text-slate-500"><%= @conversation.staff&.name %><%= " · #{@conversation.guardian.name}" if @conversation.guardian %></p>
+      </header>
+
+      <div class="flex-1 space-y-3 overflow-y-auto p-5" style="max-height: 28rem">
+        <% @messages.each do |m| %>
+          <% mine = m.sender_id == current_user.id %>
+          <div class="flex <%= mine ? "justify-end" : "justify-start" %>">
+            <div class="max-w-[75%] rounded-2xl px-3.5 py-2 text-sm <%= mine ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-900" %>">
+              <p class="whitespace-pre-line"><%= m.body %></p>
+              <p class="mt-1 text-[10px] <%= mine ? "text-indigo-200" : "text-slate-500" %>">
+                <%= m.sender.display_name %> · <%= m.created_at.strftime("%-d %b, %H:%M") %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+        <% if @messages.empty? %><p class="text-center text-sm text-slate-400">Say hello.</p><% end %>
+      </div>
+
+      <% if current_user.can?("chat.write") %>
+        <%= form_with url: conversation_path(@conversation), method: :patch, class: "flex gap-2 border-t border-slate-200 p-3" do %>
+          <%= text_field_tag :body, nil, placeholder: "Write a message…", autocomplete: "off",
+                class: "flex-1 rounded-lg border-slate-300 text-sm shadow-sm" %>
+          <%= submit_tag "Send", class: "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white", name: nil %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="grid flex-1 place-items-center p-10 text-sm text-slate-400">Pick a conversation.</div>
+    <% end %>
+  </section>
+</div>

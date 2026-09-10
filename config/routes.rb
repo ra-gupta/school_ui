@@ -100,6 +100,29 @@ Rails.application.routes.draw do
   resources :payslips, path: "payroll"
   resources :ledger_entries, path: "accounts"
 
+  scope "/communications" do
+    root "message_logs#index", as: :communications
+    resources :message_logs, path: "sent"
+    resources :message_templates, path: "templates"
+  end
+
+  scope "/ptm" do
+    root "ptm_meetings#index", as: :ptm
+    resources :ptm_meetings, path: "meetings"
+    resources :ptm_slots, path: "slots"
+  end
+
+  scope "/surveys" do
+    root "surveys#index", as: :surveys_root
+    resources :surveys, path: "surveys"
+    resources :survey_questions, path: "questions"
+  end
+
+  resources :kb_articles, path: "knowledge-base"
+  resources :web_pages, path: "website"
+  resources :greeting_campaigns, path: "engagement"
+  resources :conversations, path: "chat", only: [ :index, :show, :create, :update ]
+
   # ---- JSON API for the Flutter app ---------------------------------------
   namespace :api do
     namespace :v1 do
@@ -113,6 +136,9 @@ Rails.application.routes.draw do
       get   "fees",        to: "fees#index"
       post  "fees/invoices/:id/payments", to: "fees#pay", as: :fee_payment
       post  "driver/location", to: "driver#location"
+      get   "conversations",            to: "chat#index"
+      get   "conversations/:id",        to: "chat#show"
+      post  "conversations/:id/messages", to: "chat#create"
 
       # Generic CRUD for every Manageable model, e.g. /api/v1/books
       get    ":resource",     to: "resources#index",   as: :resources
