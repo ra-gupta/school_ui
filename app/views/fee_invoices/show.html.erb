@@ -23,6 +23,15 @@
   </section>
 
   <div class="space-y-6">
+    <% if current_user.kind.in?(%w[parent student]) && @invoice.balance.positive? && Payments::Razorpay.configured? %>
+      <section class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="mb-3 text-sm font-semibold text-slate-700">Pay online</h2>
+        <%= button_to "Pay #{rupees(@invoice.balance)} now", fee_checkouts_path, params: { invoice_ids: [ @invoice.id ] },
+              class: "w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500" %>
+        <p class="mt-2 text-xs text-slate-500">UPI, cards and netbanking via Razorpay. A receipt is issued immediately.</p>
+      </section>
+    <% end %>
+
     <% if current_user.can?("fees.collect") && @invoice.balance.positive? %>
       <section class="rounded-xl border border-slate-200 bg-white p-5">
         <h2 class="mb-3 text-sm font-semibold text-slate-700">Collect payment</h2>

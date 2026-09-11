@@ -60,6 +60,9 @@ group :test do
   gem "selenium-webdriver"
 end
 
+# Online fee payment. Orders are created and signatures verified server-side.
+gem "razorpay"
+
 # Ruby 3.4 dropped csv from the default gems; the reports export needs it.
 gem "csv"
 

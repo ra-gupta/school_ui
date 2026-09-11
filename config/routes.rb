@@ -25,6 +25,9 @@ Rails.application.routes.draw do
       resources :fee_payments, only: [ :create, :destroy ], path: "payments"
     end
     resources :fee_structures, path: "structures", except: [ :show ]
+    resources :fee_checkouts, path: "pay", only: :create do
+      post :confirm, on: :member
+    end
     resources :fee_heads, path: "heads", except: [ :show, :new, :edit ]
   end
 
@@ -162,6 +165,9 @@ Rails.application.routes.draw do
       post  "fees/invoices/:id/payments", to: "fees#pay", as: :fee_payment
       post  "driver/location", to: "driver#location"
       get   "bus",             to: "bus#show"
+      post  "payments/orders",             to: "payments#create"
+      get   "payments/orders/:id",         to: "payments#show"
+      post  "payments/orders/:id/confirm", to: "payments#confirm"
       get   "conversations",            to: "chat#index"
       get   "conversations/:id",        to: "chat#show"
       post  "conversations/:id/messages", to: "chat#create"
@@ -175,6 +181,8 @@ Rails.application.routes.draw do
       delete ":resource/:id", to: "resources#destroy"
     end
   end
+
+  post "webhooks/razorpay", to: "webhooks#razorpay"
 
   get "up" => "rails/health#show", as: :rails_health_check
 end

@@ -62,6 +62,27 @@ broadcasts on `VehicleChannel` → every open map moves the marker. No refresh, 
 Turbo, Stimulus, Action Cable, none of it. Every screen had been server-rendered HTML with
 plain form submits. Now installed and verified by the suite.
 
+## Online payments (Razorpay)
+
+Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET`; until then the
+API returns 503 `payments_not_configured` and the web "Pay now" button does not render. Test
+keys from the Razorpay dashboard work end-to-end without real money.
+
+- **The client never says "paid".** It returns an order id, payment id and Razorpay's HMAC
+  signature; `Payments::Razorpay#confirm` verifies the signature with our secret before a
+  rupee is recorded. The webhook (`POST /webhooks/razorpay`) is verified against the separate
+  webhook secret and runs the same confirm — whichever arrives first records it.
+- **One checkout, many invoices.** A parent pays for two children at once; the order stores a
+  per-invoice split in `payment_orders.allocations` **fixed at order time**, and the split is
+  recorded from that, never from a balance read at confirm time (a cash payment in between
+  would otherwise over-credit).
+- **Recorded exactly once** — partial unique index on `fee_payments (gateway, gateway_ref)`,
+  with `gateway_ref = "<payment_id>:<invoice_id>"`. Confirm and webhook can both land; the
+  second is a no-op.
+- Razorpay's `checkout.js` is the one external script this app loads. It is theirs.
+- **Pricing:** no setup or annual fee, but ~2% + GST per transaction. Do not tell parents
+  "no charges".
+
 ## Where to pick up
 
 Last session: 2026-09-10. `main` is green, no open branches, no open PRs.
@@ -227,8 +248,7 @@ driver GPS; generic CRUD for every `manage`d model.
 
 ### Not started
 The Flutter app. The ZKTeco `/iclock/cdata` ADMS endpoint (Rails can serve it directly — no
-Windows agent). Payment gateway integration (the fee flow records payments but does not take
-them). PDF receipts and report cards.
+Windows agent). PDF receipts and report cards.
 
 ---
 
