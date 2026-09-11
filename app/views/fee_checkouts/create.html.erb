@@ -1,0 +1,17 @@
+<% content_for :title, "Pay fees" %>
+<%= render "shared/header", title: "Pay fees" %>
+<div class="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm"
+     data-controller="razorpay-checkout"
+     data-razorpay-checkout-options-value="<%= @checkout.except(:payment_order_id).to_json %>"
+     data-razorpay-checkout-confirm-url-value="<%= confirm_fee_checkout_path(@checkout[:payment_order_id]) %>">
+  <p class="text-sm text-slate-500">Amount</p>
+  <p class="mt-1 text-3xl font-semibold"><%= rupees(@checkout[:amount] / 100.0) %></p>
+  <p class="mt-4 text-sm text-slate-500">Opening secure checkout…</p>
+  <button type="button" data-action="razorpay-checkout#open"
+          class="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white">Pay now</button>
+  <%= form_with url: confirm_fee_checkout_path(@checkout[:payment_order_id]), method: :post,
+        data: { razorpay_checkout_target: "form" }, class: "hidden" do |f| %>
+    <%= f.hidden_field :razorpay_payment_id, data: { razorpay_checkout_target: "paymentId" } %>
+    <%= f.hidden_field :razorpay_signature,  data: { razorpay_checkout_target: "signature" } %>
+  <% end %>
+</div>

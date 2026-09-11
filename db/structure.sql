@@ -2089,6 +2089,47 @@ ALTER SEQUENCE public.online_tests_id_seq OWNED BY public.online_tests.id;
 
 
 --
+-- Name: payment_orders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.payment_orders (
+    id bigint NOT NULL,
+    school_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    gateway character varying DEFAULT 'razorpay'::character varying NOT NULL,
+    gateway_order_id character varying NOT NULL,
+    gateway_payment_id character varying,
+    amount_paise integer NOT NULL,
+    currency character varying DEFAULT 'INR'::character varying NOT NULL,
+    allocations jsonb DEFAULT '{}'::jsonb NOT NULL,
+    status character varying DEFAULT 'created'::character varying NOT NULL,
+    paid_at timestamp(6) without time zone,
+    failure_reason character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: payment_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.payment_orders_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: payment_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.payment_orders_id_seq OWNED BY public.payment_orders.id;
+
+
+--
 -- Name: payslips; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3705,6 +3746,13 @@ ALTER TABLE ONLY public.online_tests ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+-- Name: payment_orders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.payment_orders ALTER COLUMN id SET DEFAULT nextval('public.payment_orders_id_seq'::regclass);
+
+
+--
 -- Name: payslips id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -4377,6 +4425,14 @@ ALTER TABLE ONLY public.online_tests
 
 
 --
+-- Name: payment_orders payment_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.payment_orders
+    ADD CONSTRAINT payment_orders_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: payslips payslips_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4666,6 +4722,13 @@ CREATE UNIQUE INDEX idx_evaluation_unique ON public.evaluations USING btree (exa
 --
 
 CREATE UNIQUE INDEX idx_exam_schedule_unique ON public.exam_schedules USING btree (exam_id, section_id, subject_id);
+
+
+--
+-- Name: idx_fee_payment_gateway_once; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_fee_payment_gateway_once ON public.fee_payments USING btree (gateway, gateway_ref) WHERE (gateway_ref IS NOT NULL);
 
 
 --
@@ -5912,6 +5975,41 @@ CREATE INDEX index_online_tests_on_staff_id ON public.online_tests USING btree (
 --
 
 CREATE INDEX index_online_tests_on_subject_id ON public.online_tests USING btree (subject_id);
+
+
+--
+-- Name: index_payment_orders_on_gateway_order_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_payment_orders_on_gateway_order_id ON public.payment_orders USING btree (gateway_order_id);
+
+
+--
+-- Name: index_payment_orders_on_gateway_payment_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_payment_orders_on_gateway_payment_id ON public.payment_orders USING btree (gateway_payment_id) WHERE (gateway_payment_id IS NOT NULL);
+
+
+--
+-- Name: index_payment_orders_on_school_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_payment_orders_on_school_id ON public.payment_orders USING btree (school_id);
+
+
+--
+-- Name: index_payment_orders_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_payment_orders_on_user_id ON public.payment_orders USING btree (user_id);
+
+
+--
+-- Name: index_payment_orders_on_user_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_payment_orders_on_user_id_and_created_at ON public.payment_orders USING btree (user_id, created_at);
 
 
 --
@@ -7419,6 +7517,14 @@ ALTER TABLE ONLY public.homeworks
 
 
 --
+-- Name: payment_orders fk_rails_79beebc2e9; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.payment_orders
+    ADD CONSTRAINT fk_rails_79beebc2e9 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: lesson_plans fk_rails_79e0d78a8c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -7899,6 +8005,14 @@ ALTER TABLE ONLY public.message_logs
 
 
 --
+-- Name: payment_orders fk_rails_d51a41ca2a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.payment_orders
+    ADD CONSTRAINT fk_rails_d51a41ca2a FOREIGN KEY (school_id) REFERENCES public.schools(id);
+
+
+--
 -- Name: route_stops fk_rails_d6208c0847; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8185,6 +8299,7 @@ ALTER TABLE ONLY public.ai_conversations
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260911090000'),
 ('20260910160500'),
 ('20260910160000'),
 ('20260910150000'),

@@ -1,12 +1,3 @@
---
--- PostgreSQL database dump
---
-
-\restrict AHhlhLVy58hhPaWjm0SyxPxbqLNM1pyo5TLIAvx2WlFe5PZl4dT8RO8dOEreVPW
-
--- Dumped from database version 17.11 (Ubuntu 17.11-1.pgdg22.04+2)
--- Dumped by pg_dump version 17.11 (Ubuntu 17.11-1.pgdg22.04+2)
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -139,5 +130,8 @@ CREATE INDEX index_solid_cable_messages_on_created_at ON public.solid_cable_mess
 -- PostgreSQL database dump complete
 --
 
-\unrestrict AHhlhLVy58hhPaWjm0SyxPxbqLNM1pyo5TLIAvx2WlFe5PZl4dT8RO8dOEreVPW
+SET search_path TO "$user", public;
+
+INSERT INTO "schema_migrations" (version) VALUES
+('1');
 
