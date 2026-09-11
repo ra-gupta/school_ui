@@ -19,6 +19,10 @@ default:
   # ten digits they know. Change it for a school outside India.
   default_country_code: "<%= ENV.fetch("DEFAULT_COUNTRY_CODE", "+91") %>"
 
+  # Road-snapped routing for bus routes (OSRM-compatible). The public demo
+  # server is for development only; self-host or pay for one before going live.
+  routing_url: <%= ENV.fetch("ROUTING_URL", "https://router.project-osrm.org") %>
+
   # Rows per page in every list screen and in the JSON API's default page size.
   per_page: <%= ENV.fetch("PER_PAGE", 25) %>
 

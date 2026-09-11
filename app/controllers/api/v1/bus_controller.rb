@@ -19,6 +19,7 @@ module Api
             stops: route.route_stops.map { { name: it.name, lat: it.latitude&.to_f, lng: it.longitude&.to_f,
                                              pickup_at: it.pickup_at&.strftime("%H:%M") } },
             trail: fixes.last(120).map { { lat: it.latitude.to_f, lng: it.longitude.to_f } },
+            road: route.geometry,
             channel: { name: "VehicleChannel", vehicle_id: vehicle.id } }
         }
       end
