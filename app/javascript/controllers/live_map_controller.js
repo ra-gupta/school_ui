@@ -41,8 +41,12 @@ export default class extends Controller {
       L.circleMarker([s.lat, s.lng], { radius: 5, color: "#4f46e5", weight: 2, fillColor: "#fff", fillOpacity: 1 })
        .bindTooltip(s.name).addTo(this.map)
     })
-    if (v.stops.length > 1) {
-      L.polyline(v.stops.map(s => [s.lat, s.lng]), { color: "#4f46e5", weight: 2, dashArray: "6 6", opacity: 0.5 }).addTo(this.map)
+    // The planned route: along the roads when the router has supplied it,
+    // straight between stops until then.
+    const planned = v.road && v.road.length > 1 ? v.road : v.stops.map(s => [s.lat, s.lng])
+    if (planned.length > 1) {
+      L.polyline(planned, { color: "#4f46e5", weight: v.road?.length ? 4 : 2, opacity: v.road?.length ? 0.45 : 0.5,
+                            dashArray: v.road?.length ? null : "6 6", lineCap: "round", lineJoin: "round" }).addTo(this.map)
     }
 
     bus.trail = L.polyline(v.trail.map(f => [f.lat, f.lng]), { color: "#2a78d6", weight: 3, opacity: 0.7 }).addTo(this.map)
@@ -52,6 +56,8 @@ export default class extends Controller {
                     .bindTooltip(v.label, { permanent: true, direction: "top", offset: [0, -14], className: "bus-label" })
                     .addTo(this.map)
     }
+
+    if (bus.marker) bus.marker.on("click", () => this.showDetail(bus))
 
     bus.subscription = this.cable.subscriptions.create(
       { channel: "VehicleChannel", vehicle_id: v.id },
@@ -63,12 +69,17 @@ export default class extends Controller {
   }
 
   icon(heading) {
-    // An arrow reads direction at a glance; a bus glyph does not rotate well.
+    // The bus stays upright — a rotated bus reads as a crash at 180° — and a
+    // pointer on the ring's edge carries the heading instead.
     return L.divIcon({
       className: "bus-marker",
-      html: `<div class="bus-marker__ring"><svg viewBox="0 0 24 24" style="transform: rotate(${heading || 0}deg)">
-               <path d="M12 3 L19 20 L12 16 L5 20 Z" fill="currentColor"/></svg></div>`,
-      iconSize: [32, 32], iconAnchor: [16, 16]
+      html: `<div class="bus-marker__wrap">
+               <div class="bus-marker__pointer" style="transform: rotate(${heading || 0}deg)"><span></span></div>
+               <div class="bus-marker__ring">
+                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 16c0 .9.4 1.7 1 2.2V20a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1.8c.6-.5 1-1.3 1-2.2V6c0-3.5-3.6-4-8-4S4 2.5 4 6v10zm3.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM6 11V6h12v5H6z"/></svg>
+               </div>
+             </div>`,
+      iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -22]
     })
   }
 
@@ -83,6 +94,7 @@ export default class extends Controller {
       bus.marker = L.marker(to, { icon: this.icon(fix.heading), zIndexOffset: 1000 })
                     .bindTooltip(bus.label, { permanent: true, direction: "top", offset: [0, -14], className: "bus-label" })
                     .addTo(this.map)
+      bus.marker.on("click", () => this.showDetail(bus))
       bus.position = to
     } else {
       // Glide over the real gap between fixes so the marker arrives just as the
@@ -96,6 +108,50 @@ export default class extends Controller {
 
     this.render(bus)
     if (this.followValue === bus.id) this.map.panTo(to, { animate: true, duration: 0.8 })
+    if (bus.detailOpen) this.showDetail(bus)
+  }
+
+  // ---- exact location ------------------------------------------------------
+
+  async showDetail(bus) {
+    if (!bus.position) return
+    bus.detailOpen = true
+    const next = this.nextStop(bus)
+    const { lat, lng } = bus.position
+    const html = (place) => `
+      <div class="bus-detail">
+        <p class="bus-detail__title">${bus.label}${bus.driver ? " · " + bus.driver : ""}</p>
+        <p class="bus-detail__place">${place || "Locating…"}</p>
+        <dl>
+          <dt>Coordinates</dt><dd><a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}" target="_blank" rel="noopener">${lat.toFixed(5)}, ${lng.toFixed(5)}</a></dd>
+          <dt>Speed</dt><dd>${bus.speed != null ? Math.round(bus.speed) + " km/h" : "—"} · heading ${bus.heading ?? "—"}°</dd>
+          <dt>Nearest stop</dt><dd>${next ? `${next.name} · ${Math.round(next.distance)} m · ${this.eta(next.distance, bus.speed)}` : "—"}</dd>
+          <dt>Updated</dt><dd>${bus.at ? new Date(bus.at).toLocaleTimeString() : "—"}</dd>
+        </dl>
+      </div>`
+    if (!bus.popup) bus.popup = L.popup({ maxWidth: 280, className: "bus-popup", autoPan: false })
+    bus.popup.setLatLng(bus.position).setContent(html(bus.place)).openOn(this.map)
+    bus.popup.on("remove", () => { bus.detailOpen = false })
+
+    const place = await this.placeName(bus)
+    if (bus.detailOpen && place) bus.popup.setContent(html(place))
+  }
+
+  // Reverse geocode through OSM's Nominatim, at most once per ~50m of travel:
+  // its usage policy is one request a second, and a bus posts more often.
+  async placeName(bus) {
+    const { lat, lng } = bus.position
+    if (bus.placeAt && bus.position.distanceTo(bus.placeAt) < 50) return bus.place
+    bus.placeAt = bus.position
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=17`,
+                            { headers: { "Accept": "application/json" } })
+      const j = await r.json()
+      const a = j.address || {}
+      bus.place = [a.road || a.pedestrian || a.neighbourhood, a.suburb || a.village || a.town, a.city || a.county]
+                    .filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ") || j.display_name
+    } catch { bus.place = bus.place || null }
+    return bus.place
   }
 
   glide(bus, from, to, durationMs) {
@@ -160,7 +216,17 @@ export default class extends Controller {
     this.followValue = this.followValue === id ? 0 : id
     this.element.querySelectorAll("[data-action*='follow']").forEach(b => b.classList.toggle("is-active", Number(b.dataset.vehicle) === this.followValue))
     const bus = this.buses.get(id)
-    if (this.followValue && bus?.position) this.map.setView(bus.position, Math.max(this.map.getZoom(), 15), { animate: true })
+    if (this.followValue && bus?.position) {
+      this.map.setView(bus.position, Math.max(this.map.getZoom(), 16), { animate: true })
+      this.showDetail(bus)
+    }
+  }
+
+  locate(event) {
+    const bus = this.buses.get(Number(event.currentTarget.dataset.vehicle))
+    if (!bus?.position) return
+    this.map.setView(bus.position, 17, { animate: true })
+    this.showDetail(bus)
   }
 
   fitAll() {

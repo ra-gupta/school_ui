@@ -9,11 +9,16 @@
 # over Action Cable and moves the marker, with no page reload. Not part of the
 # CI suite because it needs Solid Cable across two processes and OSM tiles.
 require "selenium-webdriver"
+require "fileutils"
 
 HOST = ENV.fetch("HOST", "http://localhost:3999")
 
 opts = Selenium::WebDriver::Chrome::Options.new
-%w[--headless=new --window-size=1440,1000 --no-sandbox].each { opts.add_argument(it) }
+# --incognito and the two prefs: see test/application_system_test_case.rb.
+# Without them headless Chrome drops every click after the sign-in form.
+%w[--headless=new --window-size=1440,1000 --no-sandbox --incognito].each { opts.add_argument(it) }
+opts.add_preference("credentials_enable_service", false)
+opts.add_preference("profile.password_manager_enabled", false)
 driver = Selenium::WebDriver.for(:chrome, options: opts)
 wait = Selenium::WebDriver::Wait.new(timeout: 20)
 
@@ -43,10 +48,19 @@ before = read.call
 puts "before: #{before}"
 
 # Drive the bus for 12s in another process and look while it is moving.
-pid = spawn("bin/rails transport:simulate SECONDS=12 EVERY=1", out: File::NULL, err: File::NULL)
+pid = spawn("bin/rails transport:simulate SECONDS=40 EVERY=1", out: File::NULL, err: File::NULL)
 sleep 6
 during = read.call
 puts "during: #{during}"
+
+# Zoomed-in capture with the exact-location popup open, while it is moving.
+# Follow keeps the map on the bus between fixes; Locate alone would let it
+# drive out of the viewport before the capture.
+driver.find_element(css: "[data-action='live-map#follow']").click
+sleep 4
+FileUtils.mkdir_p("tmp/screenshots")
+driver.save_screenshot("tmp/screenshots/live_tracking_detail.png")
+puts "saved tmp/screenshots/live_tracking_detail.png"
 Process.wait(pid)
 
 moved = before["pos"] != during["pos"]

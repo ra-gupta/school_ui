@@ -3144,7 +3144,10 @@ CREATE TABLE public.transport_routes (
     end_point character varying,
     fare numeric(10,2) DEFAULT 0.0 NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    geometry jsonb DEFAULT '[]'::jsonb NOT NULL,
+    geometry_fetched_at timestamp(6) without time zone,
+    road_distance_m integer
 );
 
 
@@ -8299,6 +8302,7 @@ ALTER TABLE ONLY public.ai_conversations
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260911100000'),
 ('20260911090000'),
 ('20260910160500'),
 ('20260910160000'),

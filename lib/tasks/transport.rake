@@ -12,8 +12,11 @@ namespace :transport do
     stops = vehicle.transport_routes.flat_map { it.route_stops.order(:position).to_a }.select { it.latitude && it.longitude }
     abort "Vehicle #{vehicle.registration_no} has no stops with coordinates." if stops.size < 2
 
-    # Out along the stops and back, so a long run does not sail off the map.
-    path = (stops + stops.reverse[1..]).map { [ it.latitude.to_f, it.longitude.to_f ] }
+    # Along the road when the router has supplied it, else stop to stop; out
+    # and back either way, so a long run does not sail off the map.
+    road = vehicle.transport_routes.flat_map(&:geometry)
+    legs = road.size > 1 ? road : stops.map { [ it.latitude.to_f, it.longitude.to_f ] }
+    path = legs + legs.reverse[1..]
     fixes = (seconds / every).to_i
     per_leg = [ fixes / (path.size - 1), 1 ].max
 
@@ -33,6 +36,19 @@ namespace :transport do
       end
     end
     puts "\ndone"
+  end
+
+  desc "Fetch the road-following path for every route (needs a routing server; see AppConfig routing_url)"
+  task refresh_routes: :environment do
+    TransportRoute.unscoped.includes(:route_stops).find_each do |route|
+      Current.school = route.school
+      route.refresh_geometry!
+      puts "#{route.school.code} #{route.name}: #{route.geometry.size} points, #{route.road_distance_m} m"
+    rescue Routing::Osrm::Unavailable => e
+      puts "#{route.name}: router unavailable (#{e.message})"
+    ensure
+      Current.school = nil
+    end
   end
 
   desc "Thin old GPS fixes: keep one per minute after a week, drop everything older than a month"

@@ -18,6 +18,9 @@ class VehicleTrackingController < ApplicationController
         heading: last&.heading, speed: last&.speed&.to_f, at: last&.recorded_at&.iso8601(3),
         stops: v.transport_routes.flat_map(&:route_stops).select { it.latitude && it.longitude }
                 .map { { name: it.name, lat: it.latitude.to_f, lng: it.longitude.to_f } },
+        # Road-following path when the router has been asked; the map falls
+        # back to straight lines between stops otherwise.
+        road: v.transport_routes.flat_map(&:geometry),
         trail: fixes.last(200).map { { lat: it.latitude.to_f, lng: it.longitude.to_f } }
       }
     end

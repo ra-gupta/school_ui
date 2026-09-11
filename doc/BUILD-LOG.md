@@ -53,9 +53,20 @@ broadcasts on `VehicleChannel` → every open map moves the marker. No refresh, 
   running dev server, so it is not in CI.
 - **Retention:** `transport:prune_locations` runs nightly — one fix per minute after a week,
   nothing after a month. A bus posting every few seconds writes thousands of rows a day.
-- **ETA is straight-line distance ÷ speed** to the nearest stop, and "next stop" is simply
-  the nearest. Honest, and marked `ponytail:` — road-snapped routing (OSRM) and
-  route-order awareness are the upgrades if it misleads.
+- **The planned route follows the roads.** `Routing::Osrm` fetches the road path through a
+  route's stops (OSRM speaks `lng,lat`; everything else here speaks `lat,lng` — the test
+  covers exactly that) and caches it on `transport_routes.geometry`; moving a stop refetches
+  it off the request. The map falls back to straight lines between stops until it exists.
+  `AppConfig[:routing_url]` defaults to OSRM's **public demo server, which is development
+  only** — self-host or pay for one before going live. Google Directions is the same
+  `#route` signature in one class if its look is wanted, but it needs a billing account
+  even on the free tier; OSM + OSRM need nothing.
+- **"Where is it?"** — clicking a bus or the button opens the exact location: coordinates
+  (linked to OSM), speed and heading, nearest stop with distance and ETA, and the street,
+  reverse-geocoded through Nominatim at most once per ~50 m of travel (their usage policy
+  is one request a second; a bus posts more often).
+- **ETA is still straight-line ÷ speed** to the nearest stop. Along-the-road distance from
+  the cached geometry is the upgrade if it misleads.
 
 **Importmap was never installed until this branch.** `config/importmap.rb` did not exist, so
 `javascript_importmap_tags` rendered nothing and **no JavaScript ran in the app at all** —
@@ -208,6 +219,14 @@ Validator: `dataviz` skill's `scripts/validate_palette.js` (copy it into a dir w
   and `SchoolEvent` both declared `ALL`, and the second to load silently clobbered the
   first — `SchoolModule.all` started returning events. Declare them in a reopened
   `class Foo ... end` body instead. The screenshot suite caught this; nothing else would have.
+- **Headless Chrome drops every click after the sign-in form.** Submitting a form Chrome
+  recognises as a credential form makes its password-manager UI take the tab's input focus
+  and never return it: JavaScript keeps running, pages keep rendering, `elementFromPoint`
+  still finds the button — and no pointer event ever fires. A cookie-set login or a
+  hidden-field POST is unaffected, which is how it was isolated. **The app is fine; only
+  the test browser was affected.** Fixed in `test/application_system_test_case.rb` with
+  `--incognito` plus the two password-manager prefs; `script/live_tracking_check.rb` uses
+  the same. Any earlier "flaky click" theory (Turbo cache, stale nodes) was probably this.
 - **`bin/rails zeitwerk:check`** is the cheap way to catch class-body errors without a 2-minute
   Selenium run. Use it after writing controllers.
 
