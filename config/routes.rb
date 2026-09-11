@@ -161,6 +161,7 @@ Rails.application.routes.draw do
       get   "fees",        to: "fees#index"
       post  "fees/invoices/:id/payments", to: "fees#pay", as: :fee_payment
       post  "driver/location", to: "driver#location"
+      get   "bus",             to: "bus#show"
       get   "conversations",            to: "chat#index"
       get   "conversations/:id",        to: "chat#show"
       post  "conversations/:id/messages", to: "chat#create"

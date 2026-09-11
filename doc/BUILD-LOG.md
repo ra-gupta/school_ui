@@ -28,6 +28,40 @@ one `MessageLog` per reachable channel, which `Notifications::DeliveryJob` then 
 external dependency, a key to rotate, and a leak surface, for answers the dashboard already
 gives exactly and for free. Its registry entry is removed; 43 modules remain.
 
+## Live tracking
+
+Driver fix → `POST /api/v1/driver/location` → `vehicle_locations` row → `after_create_commit`
+broadcasts on `VehicleChannel` → every open map moves the marker. No refresh, no polling.
+
+- **What makes it feel live** is in `app/javascript/controllers/live_map_controller.js`: the
+  marker *glides* from its last position to the new one over the real gap between fixes
+  (capped at 6s), the arrow rotates to the heading, and the ETA / "updated 3s ago" tick on
+  their own clock. Without the glide it is a marker that jumps every few seconds.
+- **Who may watch** is decided in `VehicleChannel#subscribed`, not the client: staff with
+  `transport.read` see the fleet; a family sees only the bus their child rides. Same rule as
+  chat.
+- **Leaflet is vendored** (`vendor/javascript/leaflet.js`, `app/assets/stylesheets/leaflet.css`,
+  `app/assets/images/leaflet/`) for the same reason the font is: the campus may be offline.
+  Map *tiles* still come from tile.openstreetmap.org — self-hosting those is a real project.
+- **Development uses Solid Cable, not `async`.** `async` is in-process only, so a broadcast
+  from `bin/rails transport:simulate` in one terminal would never reach a browser served by
+  `bin/dev` in another. Dev has its own `school_development_cable` database; with
+  `structure.sql` format, `db:prepare` needs `db/cable_structure.sql`, which now exists.
+- **`bin/rails transport:simulate`** drives a bus along its route so the map can be watched
+  without the Flutter app. **`script/live_tracking_check.rb`** is the end-to-end proof — a fix
+  from another process moving the marker in a real browser over the socket — and needs a
+  running dev server, so it is not in CI.
+- **Retention:** `transport:prune_locations` runs nightly — one fix per minute after a week,
+  nothing after a month. A bus posting every few seconds writes thousands of rows a day.
+- **ETA is straight-line distance ÷ speed** to the nearest stop, and "next stop" is simply
+  the nearest. Honest, and marked `ponytail:` — road-snapped routing (OSRM) and
+  route-order awareness are the upgrades if it misleads.
+
+**Importmap was never installed until this branch.** `config/importmap.rb` did not exist, so
+`javascript_importmap_tags` rendered nothing and **no JavaScript ran in the app at all** —
+Turbo, Stimulus, Action Cable, none of it. Every screen had been server-rendered HTML with
+plain form submits. Now installed and verified by the suite.
+
 ## Where to pick up
 
 Last session: 2026-09-10. `main` is green, no open branches, no open PRs.
@@ -50,6 +84,9 @@ to PATH).
 
 - **No device-token store**, so push resolves to no address and is skipped. Build it with the
   Flutter app — it is the reason push exists.
+- **Driver app.** The server side of live tracking is done and proven; what posts the fixes
+  is the Flutter driver screen — `geolocator` in the background, every ~5s while a trip is
+  active, surviving the screen being off. That is the hard half.
 - **Password reset is email-only.** A parent who signs in with a mobile number and has no
   email address cannot reset their own password. Needs an SMS OTP path, so it waits on the
   vendor decision.

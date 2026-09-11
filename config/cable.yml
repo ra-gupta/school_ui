@@ -3,7 +3,14 @@
 # not a terminal started via bin/rails console! Add "console" to any action or any ERB template view
 # to make the web console appear.
 development:
-  adapter: async
+  # solid_cable rather than async: async is in-process only, so a broadcast
+  # from bin/rails transport:simulate would never reach a browser on bin/dev.
+  adapter: solid_cable
+  connects_to:
+    database:
+      writing: cable
+  polling_interval: 0.1.seconds
+  message_retention: 1.day
 
 test:
   adapter: test
